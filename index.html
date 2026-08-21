@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmartSpend - 雲端即時同步記帳</title>
+  <title>SmartSpend - 終端指令：資源同步</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -11,7 +11,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   
   <script>
     tailwind.config = {
@@ -19,6 +19,14 @@
         extend: {
           fontFamily: {
             sans: ['"Plus Jakarta Sans"', '"Noto Sans TC"', 'sans-serif'],
+          },
+          colors: {
+            neon: {
+              cyan: '#00f0ff',
+              purple: '#b026ff',
+              green: '#39ff14',
+              pink: '#ff007f'
+            }
           }
         }
       }
@@ -26,54 +34,59 @@
   </script>
   <style>
     body {
-      background-color: #0f172a;
+      background-color: #020617; /* 曜石黑/深空背景 */
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.08), transparent 25%);
       color: #f8fafc;
       font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
     }
     .glass-card {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
       background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: rgba(148, 163, 184, 0.2);
-      border-radius: 9999px;
-    }
+    .neon-border-cyan { border: 1px solid rgba(0, 240, 255, 0.3); box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1); }
+    .neon-border-purple { border: 1px solid rgba(176, 38, 255, 0.3); box-shadow: inset 0 0 10px rgba(176, 38, 255, 0.1); }
+    
+    .glow-text-cyan { text-shadow: 0 0 8px rgba(0, 240, 255, 0.6); }
+    .glow-text-purple { text-shadow: 0 0 8px rgba(176, 38, 255, 0.6); }
+
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.8); }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.3); border-radius: 9999px; }
+    
+    /* 遊戲風格進度條斜角 */
+    .rpg-bar-container { transform: skewX(-15deg); overflow: hidden; border-radius: 4px; }
+    .rpg-bar-fill { transform: skewX(15deg) scaleX(1.1); transform-origin: left; }
   </style>
 </head>
-<body class="min-h-screen pb-16 antialiased selection:bg-emerald-500 selection:text-white">
+<body class="min-h-screen pb-16 antialiased selection:bg-neon-purple selection:text-white">
 
-  <!-- 頂部導航欄 -->
-  <header class="border-b border-slate-800/80 bg-slate-900/60 sticky top-0 z-30 backdrop-blur-md">
+  <!-- 頂部導航欄 (HUD) -->
+  <header class="border-b border-indigo-500/20 bg-slate-950/80 sticky top-0 z-30 backdrop-blur-xl shadow-[0_0_20px_rgba(99,102,241,0.1)]">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-slate-950 font-bold text-lg">
-          <i data-lucide="cloud" class="w-5 h-5"></i>
+        <div class="w-10 h-10 rounded-tl-xl rounded-br-xl rounded-tr-sm rounded-bl-sm bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.5)] border border-purple-400/50">
+          <i data-lucide="cpu" class="w-5 h-5 text-white"></i>
         </div>
         <div>
-          <h1 class="font-bold text-lg text-white leading-tight">SmartSpend</h1>
-          <div class="flex items-center space-x-1.5 text-xs text-slate-400">
-            <span id="sync-indicator" class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
-            <span id="sync-status">連線設定中...</span>
+          <h1 class="font-black text-lg text-white leading-tight tracking-wider uppercase glow-text-cyan">Smart<span class="text-neon-cyan">Spend</span></h1>
+          <div class="flex items-center space-x-1.5 text-[10px] text-slate-400 uppercase tracking-widest font-mono">
+            <span id="sync-indicator" class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block shadow-[0_0_5px_currentColor]"></span>
+            <span id="sync-status">Terminal Booting...</span>
           </div>
         </div>
       </div>
 
-      <div class="flex items-center space-x-2">
-        <!-- 匯率狀態 -->
-        <div class="hidden sm:flex items-center space-x-2 text-xs bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700/60 text-slate-300">
-          <span>1,000 KRW ≈ <strong class="text-emerald-400" id="rate-krw-text">5.60 HKD</strong></span>
+      <div class="flex items-center space-x-3">
+        <div class="hidden sm:flex items-center space-x-2 text-[11px] font-mono bg-slate-900/80 px-3 py-1.5 rounded-sm border border-cyan-500/20 text-cyan-200 shadow-[inset_0_0_10px_rgba(0,240,255,0.05)]">
+          <span>EXCHANGE: 1K KRW ≈ <strong class="text-neon-cyan glow-text-cyan" id="rate-krw-text">5.60 HKD</strong></span>
         </div>
-        <!-- 雲端設定按鈕 -->
-        <button id="btn-open-settings" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700/60 flex items-center space-x-1.5 transition-all">
-          <i data-lucide="settings" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">同步設定</span>
+        <button id="btn-open-settings" class="px-3 py-1.5 rounded-sm bg-indigo-900/40 hover:bg-indigo-900/60 text-xs font-bold text-indigo-200 border border-indigo-500/50 flex items-center space-x-1.5 transition-all shadow-[0_0_10px_rgba(99,102,241,0.2)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)]">
+          <i data-lucide="satellite" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline uppercase">同步節點</span>
         </button>
       </div>
     </div>
@@ -82,175 +95,220 @@
   <!-- 主內容容器 -->
   <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
 
-    <!-- 1. 核心數據卡片 -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">本月總支出</span>
-          <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center">
-            <i data-lucide="trending-down" class="w-4 h-4"></i>
+    <!-- 🎁 戰利品結算 (Rollover Alert) -->
+    <div id="rollover-alert" class="hidden glass-card rounded-xl p-5 border-yellow-500/40 shadow-[0_0_20px_rgba(234,179,8,0.15)] bg-gradient-to-r from-yellow-900/20 to-slate-900/60 relative overflow-hidden">
+      <div class="absolute -right-4 -top-4 w-24 h-24 bg-yellow-500/10 rounded-full blur-2xl"></div>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+        <div class="flex items-start space-x-3">
+          <div class="w-10 h-10 rounded-lg bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 flex items-center justify-center shrink-0">
+            <i data-lucide="gift" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-yellow-300 uppercase tracking-wide">🎁 戰利品結算：上月驚喜掉落！</h3>
+            <p class="text-xs text-slate-300 mt-1">系統偵測到上個月的【娛樂與抽卡】額度尚未耗盡，剩餘 <strong id="rollover-amount" class="text-yellow-400 font-mono text-sm">HK$ 0.00</strong>！</p>
           </div>
         </div>
-        <div class="text-2xl sm:text-3xl font-extrabold text-white" id="stat-expense">HK$ 0.00</div>
-        <div class="text-xs text-slate-400 mt-1">共 <span id="stat-expense-count" class="text-slate-200 font-medium">0</span> 筆支出</div>
-      </div>
-
-      <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">已累積儲蓄</span>
-          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-            <i data-lucide="piggy-bank" class="w-4 h-4"></i>
-          </div>
+        <div class="flex space-x-2">
+          <button id="btn-claim-gacha" class="px-3 py-2 text-[11px] font-bold uppercase rounded bg-purple-600/20 text-purple-300 border border-purple-500/50 hover:bg-purple-600/40 transition-all hover:shadow-[0_0_10px_rgba(168,85,247,0.4)]">
+            注入本月抽卡池
+          </button>
+          <button id="btn-claim-base" class="px-3 py-2 text-[11px] font-bold uppercase rounded bg-emerald-600/20 text-emerald-300 border border-emerald-500/50 hover:bg-emerald-600/40 transition-all hover:shadow-[0_0_10px_rgba(16,185,129,0.4)]">
+            存入基地建設
+          </button>
         </div>
-        <div class="text-2xl sm:text-3xl font-extrabold text-emerald-400" id="stat-saving">HK$ 0.00</div>
-        <div class="text-xs text-slate-400 mt-1">共 <span id="stat-saving-count" class="text-slate-200 font-medium">0</span> 筆目標儲蓄</div>
-      </div>
-
-      <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">本月淨結餘</span>
-          <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
-            <i data-lucide="wallet" class="w-4 h-4"></i>
-          </div>
-        </div>
-        <div class="text-2xl sm:text-3xl font-extrabold text-white" id="stat-balance">HK$ 0.00</div>
-        <div class="text-xs text-slate-400 mt-1">總收入：<span id="stat-income" class="text-slate-200 font-medium">HK$ 0.00</span></div>
       </div>
     </div>
 
-    <!-- 2. 主操作與視覺化區塊 -->
+    <!-- 1. 動態資源消耗槽 (RPG Budget Bars) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- 日常生存模塊 -->
+      <div class="glass-card neon-border-cyan rounded-xl p-5 relative group">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="battery-charging" class="w-4 h-4 text-cyan-400"></i>
+            <span class="text-xs font-bold text-cyan-300 uppercase tracking-widest">🥪 日常生存模塊</span>
+          </div>
+          <span class="text-[10px] text-cyan-500 font-mono border border-cyan-500/30 px-1.5 rounded">45% ALLOCATION</span>
+        </div>
+        <div class="flex justify-between text-xs font-mono mb-1.5 relative z-10">
+          <span class="text-slate-300" id="survival-status-text">載入中...</span>
+          <span class="text-cyan-400 font-bold" id="survival-ratio">0 / 8,100</span>
+        </div>
+        <div class="w-full bg-slate-900 h-4 rpg-bar-container border border-cyan-900/50 shadow-[inset_0_0_5px_rgba(0,0,0,0.5)]">
+          <div id="survival-bar" class="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 rpg-bar-fill transition-all duration-700 w-0 shadow-[0_0_10px_rgba(0,240,255,0.5)]"></div>
+        </div>
+      </div>
+
+      <!-- 娛樂與抽卡模塊 -->
+      <div class="glass-card neon-border-purple rounded-xl p-5 relative group">
+        <div class="flex justify-between items-center mb-3">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i>
+            <span class="text-xs font-bold text-purple-300 uppercase tracking-widest">✨ 娛樂與抽卡模塊</span>
+          </div>
+          <span class="text-[10px] text-purple-500 font-mono border border-purple-500/30 px-1.5 rounded">25% ALLOCATION</span>
+        </div>
+        <div class="flex justify-between text-xs font-mono mb-1.5 relative z-10">
+          <span class="text-slate-300" id="gacha-status-text">載入中...</span>
+          <span class="text-purple-400 font-bold" id="gacha-ratio">0 / 4,500</span>
+        </div>
+        <div class="w-full bg-slate-900 h-4 rpg-bar-container border border-purple-900/50 shadow-[inset_0_0_5px_rgba(0,0,0,0.5)]">
+          <div id="gacha-bar" class="h-full bg-gradient-to-r from-purple-600 to-purple-400 rpg-bar-fill transition-all duration-700 w-0 shadow-[0_0_10px_rgba(176,38,255,0.5)]"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 戰績比對面板 (Core Stats Cards) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="glass-card rounded-xl p-5 border-l-4 border-l-rose-500 relative overflow-hidden">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">總消耗資源 (Total EXP)</span>
+          <i data-lucide="activity" class="w-4 h-4 text-rose-500"></i>
+        </div>
+        <div class="text-2xl font-black text-white glow-text-cyan mb-2 font-mono" id="stat-expense">HK$ 0.00</div>
+        <div class="text-[11px] px-2 py-1 bg-slate-900/50 rounded inline-block" id="mom-expense-text">分析中...</div>
+      </div>
+
+      <div class="glass-card rounded-xl p-5 border-l-4 border-l-emerald-500 relative overflow-hidden">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">基地建設資源 (Base EXP)</span>
+          <i data-lucide="hard-drive" class="w-4 h-4 text-emerald-500"></i>
+        </div>
+        <div class="text-2xl font-black text-emerald-400 glow-text-cyan mb-2 font-mono" id="stat-saving">HK$ 0.00</div>
+        <div class="text-[11px] px-2 py-1 bg-slate-900/50 rounded inline-block" id="mom-saving-text">分析中...</div>
+      </div>
+
+      <div class="glass-card rounded-xl p-5 border-l-4 border-l-blue-500 relative overflow-hidden">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">本月能量淨值 (Net Balance)</span>
+          <i data-lucide="zap" class="w-4 h-4 text-blue-500"></i>
+        </div>
+        <div class="text-2xl font-black text-white glow-text-cyan mb-2 font-mono" id="stat-balance">HK$ 0.00</div>
+        <div class="text-[11px] text-slate-400 font-mono">
+          入帳能量：<span id="stat-income" class="text-blue-300">HK$ 0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 主操作與視覺化區塊 -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-      <!-- 左側：新增交易卡片 -->
+      <!-- 左側：終端輸入面板 (Add Transaction) -->
       <div class="lg:col-span-5 space-y-6">
-        <div class="glass-card rounded-2xl p-6 relative">
-          <h2 class="text-base font-bold text-white mb-4 flex items-center space-x-2">
-            <i data-lucide="plus-circle" class="w-5 h-5 text-emerald-400"></i>
-            <span>新增記帳 / 儲蓄</span>
+        <div class="glass-card rounded-xl p-6 relative border border-slate-700/50 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
+          <h2 class="text-sm font-black text-white mb-5 flex items-center space-x-2 uppercase tracking-widest">
+            <i data-lucide="terminal" class="w-4 h-4 text-neon-cyan"></i>
+            <span>資料錄入終端</span>
           </h2>
 
           <form id="tx-form" class="space-y-4">
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1.5">類型</label>
-              <div class="grid grid-cols-3 gap-2 bg-slate-800/80 p-1 rounded-xl border border-slate-700/60">
-                <button type="button" data-type="expense" class="type-btn active py-2 rounded-lg text-xs font-semibold transition-all bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center justify-center space-x-1">
-                  <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
-                  <span>支出</span>
+              <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1.5 tracking-wider">動作類型 (Action)</label>
+              <div class="grid grid-cols-3 gap-2 bg-slate-950/80 p-1 rounded-sm border border-slate-700/60">
+                <button type="button" data-type="expense" class="type-btn active py-2 rounded-sm text-xs font-bold transition-all bg-rose-500/20 text-rose-300 border border-rose-500/50 shadow-[0_0_10px_rgba(244,63,94,0.2)]">
+                  資源消耗
                 </button>
-                <button type="button" data-type="income" class="type-btn py-2 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white flex items-center justify-center space-x-1">
-                  <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i>
-                  <span>收入</span>
+                <button type="button" data-type="income" class="type-btn py-2 rounded-sm text-xs font-bold transition-all text-slate-400 hover:text-white">
+                  能量補給
                 </button>
-                <button type="button" data-type="saving" class="type-btn py-2 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white flex items-center justify-center space-x-1">
-                  <i data-lucide="piggy-bank" class="w-3.5 h-3.5"></i>
-                  <span>儲蓄</span>
+                <button type="button" data-type="saving" class="type-btn py-2 rounded-sm text-xs font-bold transition-all text-slate-400 hover:text-white">
+                  基地升級
                 </button>
               </div>
               <input type="hidden" id="tx-type" value="expense">
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1.5">金額 & 幣別</label>
-              <div class="flex rounded-xl overflow-hidden border border-slate-700/80 focus-within:border-emerald-500 transition-all bg-slate-900/60">
-                <select id="tx-currency" class="bg-slate-800 text-slate-200 text-xs font-semibold px-3 py-2.5 outline-none border-r border-slate-700/80">
-                  <option value="HKD">HKD (港幣)</option>
-                  <option value="KRW">KRW (韓元)</option>
-                  <option value="JPY">JPY (日圓)</option>
-                  <option value="USD">USD (美元)</option>
+              <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1.5 tracking-wider">數值 & 協議 (Amount & Protocol)</label>
+              <div class="flex rounded-sm overflow-hidden border border-slate-700/80 focus-within:border-cyan-500 transition-all bg-slate-950/60 shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]">
+                <select id="tx-currency" class="bg-slate-900 text-slate-200 text-xs font-bold px-3 py-2.5 outline-none border-r border-slate-700/80 font-mono">
+                  <option value="HKD">HKD</option>
+                  <option value="KRW">KRW</option>
+                  <option value="JPY">JPY</option>
+                  <option value="USD">USD</option>
                 </select>
-                <input type="number" step="any" id="tx-amount" placeholder="0.00" required class="flex-1 bg-transparent px-3.5 py-2.5 text-sm text-white font-semibold outline-none placeholder:text-slate-600">
+                <input type="number" step="any" id="tx-amount" placeholder="0.00" required class="flex-1 bg-transparent px-3.5 py-2.5 text-sm text-neon-cyan font-black outline-none placeholder:text-slate-600 font-mono">
               </div>
 
-              <div id="conversion-preview" class="hidden mt-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 flex items-center justify-between">
+              <div id="conversion-preview" class="hidden mt-2 px-3 py-2 rounded-sm bg-cyan-900/20 border border-cyan-500/30 text-xs text-cyan-300 flex items-center justify-between font-mono">
                 <div class="flex items-center space-x-1.5">
-                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                  <span>折合港幣：</span>
+                  <i data-lucide="cpu" class="w-3 h-3"></i>
+                  <span>折算 HKD：</span>
                 </div>
-                <span class="font-bold text-sm" id="preview-hkd-val">HK$ 0.00</span>
+                <span class="font-bold text-sm glow-text-cyan" id="preview-hkd-val">HK$ 0.00</span>
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1.5">類別</label>
-                <select id="tx-category" class="w-full bg-slate-900/60 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-emerald-500">
+                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1.5 tracking-wider">分類模塊 (Category)</label>
+                <select id="tx-category" class="w-full bg-slate-950/60 border border-slate-700/80 rounded-sm px-3 py-2 text-xs text-white outline-none focus:border-cyan-500 font-medium">
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1.5">日期</label>
-                <input type="date" id="tx-date" required class="w-full bg-slate-900/60 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-emerald-500">
+                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1.5 tracking-wider">時間戳 (Timestamp)</label>
+                <input type="date" id="tx-date" required class="w-full bg-slate-950/60 border border-slate-700/80 rounded-sm px-3 py-2 text-xs text-white outline-none focus:border-cyan-500 font-mono">
               </div>
             </div>
 
             <div class="grid grid-cols-1 gap-3">
               <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1.5">支付方式 / 帳戶</label>
-                <select id="tx-account" class="w-full bg-slate-900/60 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-emerald-500">
-                  <option value="信用卡">信用卡 (Credit Card)</option>
-                  <option value="現金">現金 (Cash)</option>
-                  <option value="銀行轉帳">銀行轉帳 (FPS / Transfer)</option>
-                  <option value="八達通/電子錢包">八達通 / PayMe / Alipay</option>
-                  <option value="儲蓄專戶">儲蓄專用戶口 (Savings)</option>
+                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1.5 tracking-wider">支付節點 (Source)</label>
+                <select id="tx-account" class="w-full bg-slate-950/60 border border-slate-700/80 rounded-sm px-3 py-2 text-xs text-white outline-none focus:border-cyan-500 font-medium">
+                  <option value="信用卡">星際信用憑證 (Credit Card)</option>
+                  <option value="現金">實體晶幣 (Cash)</option>
+                  <option value="銀行轉帳">量子轉帳 (Transfer)</option>
+                  <option value="八達通/電子錢包">隨身終端 (E-Wallet)</option>
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1.5">備註 / 說明 (選填)</label>
-                <input type="text" id="tx-note" placeholder="例如：首爾烤肉、薪資入帳" class="w-full bg-slate-900/60 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-emerald-500 placeholder:text-slate-600">
+                <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1.5 tracking-wider">任務日誌 (Notes)</label>
+                <input type="text" id="tx-note" placeholder="輸入日誌詳情..." class="w-full bg-slate-950/60 border border-slate-700/80 rounded-sm px-3 py-2.5 text-xs text-white outline-none focus:border-cyan-500 placeholder:text-slate-600">
               </div>
             </div>
 
-            <button type="submit" id="btn-submit" class="w-full mt-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold py-3 rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center space-x-2 active:scale-[0.98]">
-              <i data-lucide="cloud-upload" class="w-4 h-4"></i>
-              <span id="btn-submit-text">同步至雲端</span>
+            <button type="submit" id="btn-submit" class="w-full mt-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black py-3 rounded-sm shadow-[0_0_15px_rgba(0,240,255,0.4)] transition-all flex items-center justify-center space-x-2 active:scale-[0.98] uppercase tracking-widest">
+              <i data-lucide="upload" class="w-4 h-4"></i>
+              <span id="btn-submit-text">確認傳輸</span>
             </button>
           </form>
         </div>
-
-        <div class="glass-card rounded-2xl p-5">
-          <h3 class="text-sm font-bold text-white mb-3 flex items-center justify-between">
-            <span>支出類別佔比</span>
-            <i data-lucide="pie-chart" class="w-4 h-4 text-slate-400"></i>
-          </h3>
-          <div id="category-bars" class="space-y-3">
-            <p class="text-xs text-slate-500 text-center py-4">尚無支出資料</p>
-          </div>
-        </div>
       </div>
 
-      <!-- 右側：交易紀錄列表 -->
+      <!-- 右側：戰鬥日誌 (Transaction List) -->
       <div class="lg:col-span-7 space-y-4">
-        <div class="glass-card rounded-2xl p-6 h-full flex flex-col">
+        <div class="glass-card rounded-xl p-6 h-full flex flex-col border border-slate-700/50 shadow-[0_0_20px_rgba(0,0,0,0.5)]">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-3">
             <div>
-              <h2 class="text-base font-bold text-white flex items-center space-x-2">
-                <i data-lucide="list" class="w-5 h-5 text-teal-400"></i>
-                <span>雲端明細紀錄</span>
+              <h2 class="text-sm font-black text-white flex items-center space-x-2 uppercase tracking-widest">
+                <i data-lucide="database" class="w-4 h-4 text-neon-purple"></i>
+                <span>歷史行動日誌</span>
               </h2>
-              <p class="text-xs text-slate-400 mt-0.5">跨裝置即時讀取自 Google Sheets</p>
+              <p class="text-[10px] font-mono text-slate-400 mt-1 uppercase">Cloud Sync Active</p>
             </div>
             <div class="flex items-center space-x-2">
-              <button id="btn-manual-sync" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700/60 flex items-center space-x-1.5 transition-all">
+              <button id="btn-manual-sync" class="px-3 py-1.5 rounded-sm bg-slate-900 hover:bg-slate-800 text-[11px] font-bold text-slate-200 border border-slate-700/60 flex items-center space-x-1.5 transition-all uppercase tracking-wider">
                 <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="sync-spin-icon"></i>
-                <span>重新整理</span>
+                <span>刷新</span>
               </button>
-              <button id="btn-export-csv" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700/60 flex items-center space-x-1.5 transition-all">
+              <button id="btn-export-csv" class="px-3 py-1.5 rounded-sm bg-slate-900 hover:bg-slate-800 text-[11px] font-bold text-slate-200 border border-slate-700/60 flex items-center space-x-1.5 transition-all uppercase tracking-wider">
                 <i data-lucide="download" class="w-3.5 h-3.5"></i>
                 <span>匯出</span>
               </button>
             </div>
           </div>
 
-          <div class="flex items-center space-x-2 py-3 overflow-x-auto text-xs">
-            <button data-filter="all" class="filter-btn px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium">全部</button>
-            <button data-filter="expense" class="filter-btn px-3 py-1 rounded-full bg-slate-800 text-slate-400 hover:text-white transition-all">支出</button>
-            <button data-filter="income" class="filter-btn px-3 py-1 rounded-full bg-slate-800 text-slate-400 hover:text-white transition-all">收入</button>
-            <button data-filter="saving" class="filter-btn px-3 py-1 rounded-full bg-slate-800 text-slate-400 hover:text-white transition-all">儲蓄</button>
+          <div class="flex items-center space-x-2 py-3 overflow-x-auto text-[11px] uppercase tracking-wider font-bold">
+            <button data-filter="all" class="filter-btn px-3 py-1 rounded-sm bg-cyan-500/20 text-cyan-300 border border-cyan-500/50">全部日誌</button>
+            <button data-filter="expense" class="filter-btn px-3 py-1 rounded-sm bg-slate-900 text-slate-400 border border-slate-700 hover:text-white transition-all">消耗</button>
+            <button data-filter="income" class="filter-btn px-3 py-1 rounded-sm bg-slate-900 text-slate-400 border border-slate-700 hover:text-white transition-all">補給</button>
+            <button data-filter="saving" class="filter-btn px-3 py-1 rounded-sm bg-slate-900 text-slate-400 border border-slate-700 hover:text-white transition-all">建設</button>
           </div>
 
-          <div id="tx-list" class="space-y-2.5 overflow-y-auto max-h-[540px] pr-1 custom-scrollbar flex-1">
+          <div id="tx-list" class="space-y-3 overflow-y-auto max-h-[540px] pr-1 custom-scrollbar flex-1 pt-2">
             <div class="text-center py-12 text-slate-500 space-y-2">
-              <i data-lucide="loader-2" class="w-8 h-8 mx-auto stroke-[1.5] animate-spin text-emerald-400"></i>
-              <p class="text-xs">正在從雲端載入資料...</p>
+              <i data-lucide="loader-2" class="w-8 h-8 mx-auto stroke-[1.5] animate-spin text-cyan-400"></i>
+              <p class="text-xs font-mono">正在讀取雲端陣列...</p>
             </div>
           </div>
         </div>
@@ -259,43 +317,65 @@
     </div>
   </main>
 
-  <!-- 雲端設定彈窗 (Modal) -->
-  <div id="settings-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="glass-card w-full max-w-md rounded-2xl p-6 border border-slate-700/80 shadow-2xl space-y-4">
+  <!-- 雲端設定彈窗 -->
+  <div id="settings-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-card w-full max-w-md rounded-xl p-6 border border-cyan-500/30 shadow-[0_0_30px_rgba(0,240,255,0.2)] space-y-4">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-bold text-white flex items-center space-x-2">
-          <i data-lucide="link" class="w-5 h-5 text-emerald-400"></i>
-          <span>Google 試算表同步設定</span>
+        <h3 class="text-sm font-black text-white flex items-center space-x-2 uppercase tracking-widest">
+          <i data-lucide="satellite" class="w-5 h-5 text-neon-cyan"></i>
+          <span>雲端節點設定</span>
         </h3>
         <button id="btn-close-modal" class="text-slate-400 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
-      <p class="text-xs text-slate-300 leading-relaxed">
-        請貼上你部署的 Google Apps Script <strong>Web app URL</strong>。所有裝置只要填入相同的 URL 即可完全同步。
+      <p class="text-[11px] text-slate-300 leading-relaxed font-mono">
+        請輸入主機 API 憑證 (Google Apps Script Web App URL)。以啟用跨終端數據同步協議。
       </p>
       <div>
-        <label class="block text-xs font-semibold text-slate-400 mb-1">Apps Script 部署網址</label>
-        <input type="url" id="api-url-input" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-emerald-500 font-mono">
+        <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1 tracking-wider">API 憑證 URL</label>
+        <input type="url" id="api-url-input" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-950 border border-slate-700 rounded-sm px-3 py-2.5 text-xs text-cyan-300 outline-none focus:border-cyan-500 font-mono shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]">
       </div>
       <div class="flex space-x-3 pt-2">
-        <button id="btn-save-api" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition-all">儲存並同步</button>
+        <button id="btn-save-api" class="flex-1 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black py-2.5 rounded-sm text-xs transition-all uppercase tracking-widest shadow-[0_0_15px_rgba(0,240,255,0.4)]">建立連線</button>
       </div>
     </div>
   </div>
 
   <script>
+    // 匯率狀態
     let exchangeRates = { HKD: 1.0, KRW: 0.0056, JPY: 0.051, USD: 7.82 };
-    const categories = {
-      expense: ['餐飲美食', '交通出行', '購物休閒', '娛樂休閒', '居住水電', '醫療健康', '其他支出'],
-      income: ['薪資收入', '獎金分紅', '投資回報', '兼職副業', '其他收入'],
-      saving: ['旅遊基金', '緊急備用金', '退休投資', '大件購買計畫', '一般儲蓄']
+    
+    // RPG 預算與分類設定
+    const BUDGET = {
+      SURVIVAL: 8100, // 45%
+      GACHA: 4500,    // 25%
+      BASE: 5400      // 30%
     };
+
+    const categories = {
+      expense: [
+        '餐飲美食', '交通通勤', '生活帳單', // 屬日常生存
+        '偶像應援(演唱會/周邊)', '盲盒玩具', '顏值裝備(護膚保養)', '其他購物' // 屬娛樂與抽卡
+      ],
+      income: ['基礎資源發放', '任務懸賞', '資源補給', '其他掉落'],
+      saving: ['旅行探索基金', '緊急備用資源', '長線天賦投資']
+    };
+
+    const survivalCats = ['餐飲美食', '交通通勤', '生活帳單'];
+    const gachaCats = ['偶像應援(演唱會/周邊)', '盲盒玩具', '顏值裝備(護膚保養)', '其他購物'];
 
     let transactions = JSON.parse(localStorage.getItem('smartspend_records')) || [];
     let currentFilter = 'all';
     let apiUrl = localStorage.getItem('smartspend_api_url') || '';
 
+    // 時間工具
+    const today = new Date();
+    const currentMonthStr = today.toISOString().slice(0, 7);
+    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastMonthStr = lastMonthDate.toISOString().slice(0, 7);
+
+    // 匯率獲取
     async function fetchLiveRates() {
       try {
         const res = await fetch('https://open.er-api.com/v6/latest/HKD');
@@ -310,20 +390,20 @@
           }
         }
       } catch (err) {
-        console.warn('匯率載入失敗，使用預設值', err);
+        console.warn('Network Error: Using default rates', err);
       }
     }
 
-    // 從 Google Sheets 抓取最新資料
+    // 雲端同步
     async function syncFromCloud() {
       if (!apiUrl) {
-        updateSyncStatus(false, '尚未設定 Google Sheets 連線');
+        updateSyncStatus(false, '無效連線');
         document.getElementById('settings-modal').classList.remove('hidden');
         renderDashboard();
         return;
       }
 
-      updateSyncStatus(null, '同步中...');
+      updateSyncStatus(null, 'Syncing...');
       const spinIcon = document.getElementById('sync-spin-icon');
       if (spinIcon) spinIcon.classList.add('animate-spin');
 
@@ -333,13 +413,12 @@
           const data = await res.json();
           transactions = Array.isArray(data) ? data : [];
           localStorage.setItem('smartspend_records', JSON.stringify(transactions));
-          updateSyncStatus(true, '已與雲端同步');
+          updateSyncStatus(true, '連線穩定');
         } else {
-          throw new Error('無法讀取');
+          throw new Error('讀取失敗');
         }
       } catch (err) {
-        console.error(err);
-        updateSyncStatus(false, '雲端連線異常 (使用本地快取)');
+        updateSyncStatus(false, '連線異常');
       } finally {
         if (spinIcon) spinIcon.classList.remove('animate-spin');
         renderDashboard();
@@ -351,11 +430,11 @@
       const label = document.getElementById('sync-status');
       label.textContent = text;
       if (isSuccess === true) {
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 inline-block';
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-neon-cyan inline-block shadow-[0_0_5px_#00f0ff]';
       } else if (isSuccess === false) {
-        dot.className = 'w-2 h-2 rounded-full bg-rose-400 inline-block';
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-rose-500 inline-block shadow-[0_0_5px_#f43f5e]';
       } else {
-        dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse inline-block';
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block shadow-[0_0_5px_#fbbf24]';
       }
     }
 
@@ -373,20 +452,20 @@
         renderDashboard();
       }
 
-      // 類型切換
+      // 類型切換 UI
       document.querySelectorAll('.type-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const type = e.currentTarget.dataset.type;
           document.getElementById('tx-type').value = type;
           document.querySelectorAll('.type-btn').forEach(b => {
-            b.className = 'type-btn py-2 rounded-lg text-xs font-semibold transition-all text-slate-400 hover:text-white flex items-center justify-center space-x-1';
+            b.className = 'type-btn py-2 rounded-sm text-xs font-bold transition-all text-slate-400 hover:text-white';
           });
-          const colorMap = {
-            expense: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
-            income: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-            saving: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+          const activeClass = {
+            expense: 'bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-[0_0_10px_rgba(244,63,94,0.2)]',
+            income: 'bg-blue-500/20 text-blue-300 border-blue-500/50 shadow-[0_0_10px_rgba(59,130,246,0.2)]',
+            saving: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
           };
-          e.currentTarget.className = `type-btn active py-2 rounded-lg text-xs font-semibold transition-all ${colorMap[type]} border flex items-center justify-center space-x-1`;
+          e.currentTarget.className = `type-btn active py-2 rounded-sm text-xs font-bold transition-all border ${activeClass[type]}`;
           renderCategoryOptions(type);
           updatePreview();
         });
@@ -396,7 +475,7 @@
       document.getElementById('tx-currency').addEventListener('change', updatePreview);
       document.getElementById('tx-form').addEventListener('submit', handleAddTransaction);
 
-      // 設定 Modal 事件
+      // 設定 Modal
       document.getElementById('btn-open-settings').addEventListener('click', () => {
         document.getElementById('api-url-input').value = apiUrl;
         document.getElementById('settings-modal').classList.remove('hidden');
@@ -414,15 +493,20 @@
         }
       });
 
+      // Rollover Buttons
+      document.getElementById('btn-claim-gacha').addEventListener('click', () => handleRollover('gacha'));
+      document.getElementById('btn-claim-base').addEventListener('click', () => handleRollover('base'));
+
       document.getElementById('btn-manual-sync').addEventListener('click', syncFromCloud);
       document.getElementById('btn-export-csv').addEventListener('click', exportToCSV);
 
+      // Filter Buttons
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           document.querySelectorAll('.filter-btn').forEach(b => {
-            b.className = 'filter-btn px-3 py-1 rounded-full bg-slate-800 text-slate-400 hover:text-white transition-all';
+            b.className = 'filter-btn px-3 py-1 rounded-sm bg-slate-900 text-slate-400 border border-slate-700 hover:text-white transition-all';
           });
-          e.currentTarget.className = 'filter-btn px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-medium';
+          e.currentTarget.className = 'filter-btn px-3 py-1 rounded-sm bg-cyan-500/20 text-cyan-300 border border-cyan-500/50';
           currentFilter = e.currentTarget.dataset.filter;
           renderList();
         });
@@ -445,15 +529,11 @@
       const currency = document.getElementById('tx-currency').value;
       const previewBox = document.getElementById('conversion-preview');
       const previewVal = document.getElementById('preview-hkd-val');
-
       if (!amount || isNaN(amount)) {
-        previewBox.classList.add('hidden');
-        return;
+        previewBox.classList.add('hidden'); return;
       }
-
       const rate = exchangeRates[currency] || 1.0;
       const hkdAmount = amount * rate;
-
       if (currency !== 'HKD') {
         previewBox.classList.remove('hidden');
         previewVal.textContent = `HK$ ${hkdAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -477,19 +557,9 @@
       if (!originalAmount || originalAmount <= 0) return;
 
       const newTx = {
-        id: Date.now().toString(),
-        type,
-        category,
-        originalAmount,
-        currency,
-        rate,
-        amountHKD,
-        date,
-        account,
-        note
+        id: Date.now().toString(), type, category, originalAmount, currency, rate, amountHKD, date, account, note
       };
 
-      // 樂觀更新 (先更新 UI)
       transactions.unshift(newTx);
       localStorage.setItem('smartspend_records', JSON.stringify(transactions));
       renderDashboard();
@@ -498,97 +568,177 @@
       document.getElementById('tx-note').value = '';
       document.getElementById('conversion-preview').classList.add('hidden');
 
-      // 同步到 Google Sheets
       if (apiUrl) {
-        updateSyncStatus(null, '正在寫入雲端...');
+        updateSyncStatus(null, 'Transmitting...');
         try {
-          await fetch(apiUrl, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'add', data: newTx })
-          });
-          updateSyncStatus(true, '已與雲端同步');
+          await fetch(apiUrl, { method: 'POST', body: JSON.stringify({ action: 'add', data: newTx }) });
+          updateSyncStatus(true, '連線穩定');
         } catch (err) {
-          updateSyncStatus(false, '寫入雲端失敗 (已存本地)');
+          updateSyncStatus(false, '寫入失敗 (本地保留)');
         }
       }
     }
 
     window.deleteTx = async function(id) {
-      if (!confirm('確定要刪除這筆紀錄嗎？')) return;
+      if (!confirm('執行刪除指令？該日誌將無法復原。')) return;
       transactions = transactions.filter(t => t.id !== id);
       localStorage.setItem('smartspend_records', JSON.stringify(transactions));
       renderDashboard();
 
       if (apiUrl) {
-        updateSyncStatus(null, '正在從雲端刪除...');
+        updateSyncStatus(null, 'Deleting...');
         try {
-          await fetch(apiUrl, {
-            method: 'POST',
-            body: JSON.stringify({ action: 'delete', id: id })
-          });
-          updateSyncStatus(true, '已與雲端同步');
+          await fetch(apiUrl, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) });
+          updateSyncStatus(true, '連線穩定');
         } catch (err) {
-          updateSyncStatus(false, '雲端刪除失敗');
+          updateSyncStatus(false, '刪除失敗');
         }
       }
     };
 
+    // 處理戰利品結算按鈕
+    async function handleRollover(actionType) {
+      const remainingGacha = window.lastMonthGachaRemaining || 0;
+      if(remainingGacha <= 0) return;
+
+      localStorage.setItem(`rollover_claimed_${lastMonthStr}`, 'true');
+      
+      if(actionType === 'gacha') {
+        let existingBonus = parseFloat(localStorage.getItem(`gacha_bonus_${currentMonthStr}`)) || 0;
+        localStorage.setItem(`gacha_bonus_${currentMonthStr}`, existingBonus + remainingGacha);
+        document.getElementById('rollover-alert').classList.add('hidden');
+        renderDashboard();
+      } else if (actionType === 'base') {
+        const newTx = {
+          id: Date.now().toString(),
+          type: 'saving',
+          category: '緊急備用資源',
+          originalAmount: remainingGacha,
+          currency: 'HKD',
+          rate: 1.0,
+          amountHKD: remainingGacha,
+          date: new Date().toISOString().split('T')[0],
+          account: '儲蓄專戶',
+          note: `戰利品結算：上月娛樂結餘轉入`
+        };
+        transactions.unshift(newTx);
+        localStorage.setItem('smartspend_records', JSON.stringify(transactions));
+        document.getElementById('rollover-alert').classList.add('hidden');
+        renderDashboard();
+
+        if (apiUrl) {
+          fetch(apiUrl, { method: 'POST', body: JSON.stringify({ action: 'add', data: newTx }) });
+        }
+      }
+    }
+
     function renderDashboard() {
-      let totalExpense = 0, totalIncome = 0, totalSaving = 0;
-      let expenseCount = 0, savingCount = 0;
-      const categoryExpenseMap = {};
+      let currExpense = 0, currIncome = 0, currSaving = 0;
+      let lastExpense = 0, lastSaving = 0;
+      let currSurvivalSpent = 0, currGachaSpent = 0;
+      let lastGachaSpent = 0;
 
       transactions.forEach(t => {
-        if (t.type === 'expense') {
-          totalExpense += t.amountHKD;
-          expenseCount++;
-          categoryExpenseMap[t.category] = (categoryExpenseMap[t.category] || 0) + t.amountHKD;
-        } else if (t.type === 'income') {
-          totalIncome += t.amountHKD;
-        } else if (t.type === 'saving') {
-          totalSaving += t.amountHKD;
-          savingCount++;
+        const isCurrent = t.date.startsWith(currentMonthStr);
+        const isLast = t.date.startsWith(lastMonthStr);
+
+        if (isCurrent) {
+          if (t.type === 'expense') {
+            currExpense += t.amountHKD;
+            if(survivalCats.includes(t.category)) currSurvivalSpent += t.amountHKD;
+            if(gachaCats.includes(t.category)) currGachaSpent += t.amountHKD;
+          }
+          if (t.type === 'income') currIncome += t.amountHKD;
+          if (t.type === 'saving') currSaving += t.amountHKD;
+        }
+
+        if (isLast) {
+          if (t.type === 'expense') {
+            lastExpense += t.amountHKD;
+            if(gachaCats.includes(t.category)) lastGachaSpent += t.amountHKD;
+          }
+          if (t.type === 'saving') lastSaving += t.amountHKD;
         }
       });
 
-      const netBalance = totalIncome - totalExpense - totalSaving;
+      const netBalance = currIncome - currExpense - currSaving;
       const fmt = (num) => 'HK$ ' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-      document.getElementById('stat-expense').textContent = fmt(totalExpense);
-      document.getElementById('stat-expense-count').textContent = expenseCount;
-      document.getElementById('stat-saving').textContent = fmt(totalSaving);
-      document.getElementById('stat-saving-count').textContent = savingCount;
+      document.getElementById('stat-expense').textContent = fmt(currExpense);
+      document.getElementById('stat-saving').textContent = fmt(currSaving);
       document.getElementById('stat-balance').textContent = fmt(netBalance);
-      document.getElementById('stat-income').textContent = fmt(totalIncome);
+      document.getElementById('stat-income').textContent = fmt(currIncome);
 
-      renderCategoryBars(categoryExpenseMap, totalExpense);
+      // --- 戰績對比 (MoM) ---
+      const expenseDiff = currExpense - lastExpense;
+      const momExpEl = document.getElementById('mom-expense-text');
+      if (expenseDiff > 0) {
+        momExpEl.innerHTML = `<span class="text-rose-400">警告：本月消耗比上月高 ${fmt(Math.abs(expenseDiff))}</span>`;
+      } else if (expenseDiff < 0) {
+        momExpEl.innerHTML = `<span class="text-emerald-400">解鎖成就：本月消耗比上月省了 ${fmt(Math.abs(expenseDiff))}！</span>`;
+      } else {
+        momExpEl.innerHTML = `<span class="text-slate-400">消耗與上月持平</span>`;
+      }
+
+      const savingDiff = currSaving - lastSaving;
+      const momSavEl = document.getElementById('mom-saving-text');
+      if (savingDiff >= 0) {
+        momSavEl.innerHTML = `<span class="text-emerald-400">基地建設穩步增長 (+${fmt(savingDiff)})</span>`;
+      } else {
+        momSavEl.innerHTML = `<span class="text-amber-400">建設投入略低於上月 (-${fmt(Math.abs(savingDiff))})</span>`;
+      }
+
+      // --- RPG 進度條更新 ---
+      // Survival Bar
+      const survPct = Math.min(100, (currSurvivalSpent / BUDGET.SURVIVAL) * 100);
+      const survBar = document.getElementById('survival-bar');
+      const survText = document.getElementById('survival-status-text');
+      document.getElementById('survival-ratio').textContent = `${currSurvivalSpent.toLocaleString()} / ${BUDGET.SURVIVAL.toLocaleString()}`;
+      survBar.style.width = `${survPct}%`;
+      
+      if(survPct < 60) {
+        survBar.className = "h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rpg-bar-fill transition-all duration-700 shadow-[0_0_10px_rgba(16,185,129,0.5)]";
+        survText.innerHTML = '<span class="text-emerald-400">資源充足，請盡情探索！</span>';
+      } else if (survPct < 85) {
+        survBar.className = "h-full bg-gradient-to-r from-yellow-600 to-yellow-400 rpg-bar-fill transition-all duration-700 shadow-[0_0_10px_rgba(234,179,8,0.5)]";
+        survText.innerHTML = '<span class="text-yellow-400">資源消耗加速！</span>';
+      } else {
+        survBar.className = "h-full bg-gradient-to-r from-rose-600 to-rose-500 rpg-bar-fill transition-all duration-700 shadow-[0_0_10px_rgba(244,63,94,0.5)]";
+        survText.innerHTML = '<span class="text-rose-500 font-bold animate-pulse">警告：預算見底，進入省電模式！</span>';
+      }
+
+      // Gacha Bar (含 Rollover Bonus)
+      let currentGachaBudget = BUDGET.GACHA;
+      let gachaBonus = parseFloat(localStorage.getItem(`gacha_bonus_${currentMonthStr}`)) || 0;
+      currentGachaBudget += gachaBonus;
+
+      const gachaPct = Math.min(100, (currGachaSpent / currentGachaBudget) * 100);
+      const gachaBar = document.getElementById('gacha-bar');
+      const gachaText = document.getElementById('gacha-status-text');
+      document.getElementById('gacha-ratio').textContent = `${currGachaSpent.toLocaleString()} / ${currentGachaBudget.toLocaleString()}`;
+      gachaBar.style.width = `${gachaPct}%`;
+
+      if(gachaPct < 60) {
+        gachaBar.className = "h-full bg-gradient-to-r from-purple-600 to-purple-400 rpg-bar-fill transition-all duration-700 shadow-[0_0_10px_rgba(168,85,247,0.5)]";
+        gachaText.innerHTML = '<span class="text-purple-400">水晶充裕，可以進行躍遷！</span>';
+      } else if (gachaPct < 85) {
+        gachaBar.className = "h-full bg-gradient-to-r from-pink-600 to-pink-400 rpg-bar-fill transition-all duration-700 shadow-[0_0_10px_rgba(236,72,153,0.5)]";
+        gachaText.innerHTML = '<span class="text-pink-400">抽卡資源警戒！</span>';
+      } else {
+        gachaBar.className = "h-full bg-gradient-to-r from-rose-600 to-rose-500 rpg-bar-fill transition-all duration-700 shadow-[0_0_10px_rgba(244,63,94,0.5)]";
+        gachaText.innerHTML = '<span class="text-rose-500 font-bold animate-pulse">大保底危險：請停止抽卡動作！</span>';
+      }
+
+      // --- Rollover 系統檢測 ---
+      const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthStr}`);
+      const lastMonthRemaining = BUDGET.GACHA - lastGachaSpent;
+      if (!hasClaimed && lastMonthRemaining > 0 && transactions.some(t => t.date.startsWith(lastMonthStr))) {
+        window.lastMonthGachaRemaining = lastMonthRemaining;
+        document.getElementById('rollover-amount').textContent = `HK$ ${lastMonthRemaining.toLocaleString()}`;
+        document.getElementById('rollover-alert').classList.remove('hidden');
+      }
+
       renderList();
-    }
-
-    function renderCategoryBars(catMap, totalExpense) {
-      const container = document.getElementById('category-bars');
-      if (totalExpense === 0 || Object.keys(catMap).length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">尚無支出資料</p>';
-        return;
-      }
-      const colors = ['bg-rose-500', 'bg-amber-500', 'bg-teal-500', 'bg-indigo-500', 'bg-pink-500'];
-      let html = '', i = 0;
-      for (const [cat, val] of Object.entries(catMap).sort((a, b) => b[1] - a[1])) {
-        const percent = ((val / totalExpense) * 100).toFixed(1);
-        html += `
-          <div>
-            <div class="flex justify-between text-xs mb-1">
-              <span class="text-slate-300 font-medium">${cat}</span>
-              <span class="text-slate-400">HK$ ${val.toLocaleString('en-US', { minimumFractionDigits: 1 })} (${percent}%)</span>
-            </div>
-            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-              <div class="${colors[i % colors.length]} h-1.5 rounded-full" style="width: ${percent}%"></div>
-            </div>
-          </div>
-        `;
-        i++;
-      }
-      container.innerHTML = html;
     }
 
     function renderList() {
@@ -597,9 +747,9 @@
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-12 text-slate-500 space-y-2">
-            <i data-lucide="inbox" class="w-8 h-8 mx-auto stroke-[1.5]"></i>
-            <p class="text-xs">目前沒有符合條件的紀錄</p>
+          <div class="text-center py-12 text-slate-600 space-y-2">
+            <i data-lucide="scan" class="w-8 h-8 mx-auto stroke-[1.5]"></i>
+            <p class="text-[11px] font-mono">未掃描到相關日誌</p>
           </div>
         `;
         lucide.createIcons();
@@ -608,64 +758,62 @@
 
       let html = '';
       filtered.forEach(item => {
-        let badgeColor = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+        let badgeColor = 'bg-rose-500/10 text-rose-400 border-rose-500/30';
         let sign = '-';
-        let iconName = 'shopping-bag';
+        let iconName = 'crosshair';
 
         if (item.type === 'income') {
-          badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+          badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
           sign = '+';
-          iconName = 'arrow-down-left';
+          iconName = 'zap';
         } else if (item.type === 'saving') {
-          badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+          badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
           sign = '';
-          iconName = 'piggy-bank';
+          iconName = 'shield';
         }
 
         const isForeign = item.currency !== 'HKD';
         const origText = isForeign 
-          ? `<span class="text-xs text-amber-400/90 font-mono">(${item.originalAmount.toLocaleString()} ${item.currency})</span>` 
+          ? `<span class="text-[10px] text-amber-400/90 font-mono tracking-wider ml-1">(${item.originalAmount.toLocaleString()} ${item.currency})</span>` 
           : '';
 
         html += `
-          <div class="p-3.5 rounded-xl bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/50 transition-all flex items-center justify-between group">
+          <div class="p-3 rounded-sm bg-slate-900/50 hover:bg-slate-800/80 border border-slate-800 hover:border-cyan-500/30 transition-all flex items-center justify-between group">
             <div class="flex items-center space-x-3">
-              <div class="w-9 h-9 rounded-xl ${badgeColor} border flex items-center justify-center">
+              <div class="w-8 h-8 rounded-sm ${badgeColor} border flex items-center justify-center">
                 <i data-lucide="${iconName}" class="w-4 h-4"></i>
               </div>
               <div>
                 <div class="flex items-center space-x-2">
-                  <span class="text-sm font-semibold text-white">${item.category}</span>
-                  <span class="text-[10px] px-1.5 py-0.5 rounded ${badgeColor} border font-medium">${item.account}</span>
+                  <span class="text-xs font-bold text-slate-200">${item.category}</span>
+                  <span class="text-[9px] px-1 py-0.5 rounded-sm ${badgeColor} border font-mono uppercase">${item.account}</span>
                 </div>
-                <div class="text-xs text-slate-400 flex items-center space-x-2 mt-0.5">
+                <div class="text-[10px] font-mono text-slate-500 flex items-center space-x-2 mt-0.5 uppercase tracking-wider">
                   <span>${item.date}</span>
-                  ${item.note ? `<span>•</span><span class="text-slate-300 truncate max-w-[140px] sm:max-w-[200px]">${item.note}</span>` : ''}
+                  ${item.note ? `<span class="text-slate-600">|</span><span class="text-slate-400 truncate max-w-[120px] sm:max-w-[200px]">${item.note}</span>` : ''}
                 </div>
               </div>
             </div>
-
             <div class="flex items-center space-x-3">
               <div class="text-right">
-                <div class="text-sm font-bold ${item.type === 'income' ? 'text-blue-400' : (item.type === 'saving' ? 'text-emerald-400' : 'text-slate-100')}">
+                <div class="text-sm font-black font-mono ${item.type === 'income' ? 'text-blue-400' : (item.type === 'saving' ? 'text-emerald-400' : 'text-rose-400')}">
                   ${sign}HK$ ${item.amountHKD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
                 ${origText}
               </div>
-              <button onclick="deleteTx('${item.id}')" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-400 transition-all p-1" title="刪除">
+              <button onclick="deleteTx('${item.id}')" class="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-rose-500 transition-all p-1" title="刪除數據">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
           </div>
         `;
       });
-
       container.innerHTML = html;
       lucide.createIcons();
     }
 
     function exportToCSV() {
-      if (transactions.length === 0) return alert('目前沒有資料可匯出');
+      if (transactions.length === 0) return alert('No Data');
       let csv = '\uFEFF日期,類型,類別,原始金額,幣別,參考匯率,折算港幣(HKD),帳戶,備註\n';
       transactions.forEach(t => {
         csv += `"${t.date}","${t.type}","${t.category}","${t.originalAmount}","${t.currency}","${t.rate}","${t.amountHKD}","${t.account}","${(t.note || '').replace(/"/g, '""')}"\n`;
@@ -674,7 +822,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `SmartSpend_記帳匯出_${new Date().toISOString().split('T')[0]}.csv`;
+      link.download = `SmartSpend_Terminal_Log_${new Date().toISOString().split('T')[0]}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
