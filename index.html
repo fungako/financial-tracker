@@ -3,33 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>星露谷記帳本 - Stardew Ledger</title>
+  <title>記帳手帳</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Google Fonts: Pixelify Sans & Nunito -->
+  <!-- Google Fonts: Nunito -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Pixelify+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
   
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            pixel: ['"Pixelify Sans"', '"Noto Sans TC"', 'sans-serif'],
             sans: ['"Nunito"', '"Noto Sans TC"', 'sans-serif'],
           },
           colors: {
-            stardew: {
-              wood: '#78350f',      // 深木色 (邊框)
-              woodLight: '#d97706', // 淺木色
-              paper: '#fef3c7',     // 羊皮紙底色
-              paperDark: '#fde68a',
-              grass: '#10b981',     // 草地綠
-              sky: '#38bdf8',       // 天空藍
-              berry: '#e11d48'      // 莓果紅
+            memo: {
+              bg: '#f5f5f4',       // 淺灰紙張底色
+              card: '#ffffff',     // 純白便條
+              border: '#1c1917',   // 極深灰/黑
+              text: '#1c1917',     // 主文字
+              muted: '#78716c'     // 提示灰字
             }
           }
         }
@@ -38,265 +35,276 @@
   </script>
   <style>
     body {
-      background-color: #fef8e7;
-      /* 微微的格子紋理增加農場感 */
-      background-image: linear-gradient(#fde68a 1px, transparent 1px), linear-gradient(90deg, #fde68a 1px, transparent 1px);
-      background-size: 40px 40px;
-      color: #451a03;
-      font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+      background-color: #f5f5f4;
+      /* 極簡網格筆記本背景 */
+      background-image: 
+        linear-gradient(to right, #e5e5e5 1px, transparent 1px),
+        linear-gradient(to bottom, #e5e5e5 1px, transparent 1px);
+      background-size: 24px 24px;
+      color: #1c1917;
     }
     
-    /* 星露谷木牌/羊皮紙卡片風格 */
-    .stardew-card {
-      background: #fffbeb;
-      border: 4px solid #78350f;
-      border-radius: 12px;
-      box-shadow: 4px 4px 0px #78350f;
-      transition: all 0.2s ease;
+    /* 極簡便條紙卡片風格 (Brutalism) */
+    .memo-card {
+      background: #ffffff;
+      border: 3px solid #1c1917;
+      box-shadow: 6px 6px 0px 0px #1c1917;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
     
-    /* 像素風進度條 */
-    .pixel-bar-bg {
-      background: #451a03;
-      border-radius: 4px;
-      padding: 3px;
-      border: 2px solid #78350f;
+    /* 極簡按鈕點擊效果 */
+    .memo-btn {
+      background: #ffffff;
+      border: 3px solid #1c1917;
+      box-shadow: 4px 4px 0px 0px #1c1917;
+      color: #1c1917;
+      font-weight: 800;
+      transition: all 0.15s ease;
     }
-    .pixel-bar-fill {
+    .memo-btn:hover {
+      background: #1c1917;
+      color: #ffffff;
+    }
+    .memo-btn:active {
+      transform: translate(4px, 4px);
+      box-shadow: 0px 0px 0px 0px #1c1917;
+    }
+
+    /* 黑白進度條 */
+    .memo-bar-bg {
+      background: #e5e5e5;
+      border: 2px solid #1c1917;
+      height: 20px;
+    }
+    .memo-bar-fill {
       height: 100%;
-      border-radius: 2px;
-      transition: width 0.5s ease-in-out;
+      background: #1c1917;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    /* 警告狀態：斜紋 */
+    .bar-warning {
+      background: repeating-linear-gradient(
+        45deg,
+        #1c1917,
+        #1c1917 10px,
+        #57534e 10px,
+        #57534e 20px
+      );
     }
 
-    /* 遊戲按鈕風格 */
-    .stardew-btn {
-      border: 3px solid #78350f;
-      box-shadow: 2px 3px 0px #78350f;
-      transform: translateY(0);
-      transition: all 0.1s ease;
-    }
-    .stardew-btn:active {
-      box-shadow: 0px 0px 0px #78350f;
-      transform: translateY(3px);
-    }
-
-    /* 滾動條可愛化 */
+    /* 滾動條極簡化 */
     .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #fef3c7; border-left: 2px solid #78350f; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #d97706; border-radius: 4px; border: 2px solid #78350f; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; border-left: 2px solid #1c1917; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1c1917; }
   </style>
 </head>
-<body class="min-h-screen pb-16 antialiased selection:bg-stardew-grass selection:text-white">
+<body class="min-h-screen pb-16 antialiased selection:bg-black selection:text-white">
 
-  <!-- 頂部木製導航欄 -->
-  <header class="bg-amber-600 border-b-4 border-stardew-wood sticky top-0 z-30 shadow-[0_4px_0_rgba(120,53,15,0.3)]">
+  <!-- 頂部導航欄 -->
+  <header class="bg-white border-b-[3px] border-memo-border sticky top-0 z-30 shadow-[0_4px_0_0_#1c1917]">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-lg bg-amber-100 border-2 border-stardew-wood flex items-center justify-center shadow-[2px_2px_0_#78350f]">
-          <i data-lucide="sun" class="w-6 h-6 text-amber-500"></i>
+        <div class="w-10 h-10 bg-white border-[3px] border-memo-border flex items-center justify-center text-memo-text shadow-[2px_2px_0_0_#1c1917]">
+          <i data-lucide="music" class="w-5 h-5 font-black"></i>
         </div>
         <div>
-          <h1 class="font-pixel font-bold text-xl text-white tracking-widest" style="text-shadow: 2px 2px 0 #78350f;">星露谷記帳本</h1>
-          <div class="flex items-center space-x-1.5 text-xs text-amber-100 font-bold">
-            <span id="sync-indicator" class="w-2 h-2 rounded-full bg-amber-300 inline-block border border-stardew-wood"></span>
-            <span id="sync-status">等待雲端村民...</span>
+          <h1 class="font-black text-lg tracking-tight uppercase">YongSun's <span class="bg-black text-white px-1 ml-0.5">Memo</span></h1>
+          <div class="flex items-center space-x-1.5 text-xs text-memo-muted font-bold">
+            <span id="sync-indicator" class="w-2.5 h-2.5 bg-white border-2 border-black inline-block"></span>
+            <span id="sync-status">雲端同步中...</span>
           </div>
         </div>
       </div>
 
       <div class="flex items-center space-x-3">
-        <div class="hidden sm:flex items-center space-x-2 text-xs font-bold bg-amber-800/50 px-3 py-1.5 rounded border-2 border-amber-900 text-amber-100 shadow-inner">
-          <i data-lucide="coins" class="w-3.5 h-3.5 text-yellow-300"></i>
-          <span>1,000 KRW ≈ <strong class="text-yellow-300" id="rate-krw-text">5.60 HKD</strong></span>
+        <div class="hidden sm:flex items-center space-x-2 text-xs font-black bg-white px-3 py-1.5 border-[2px] border-black shadow-[2px_2px_0_0_#1c1917]">
+          <i data-lucide="plane" class="w-3.5 h-3.5"></i>
+          <span>1K KRW ≈ <strong id="rate-krw-text">5.60 HKD</strong></span>
         </div>
-        <button id="btn-open-settings" class="stardew-btn px-3 py-1.5 rounded bg-amber-500 hover:bg-amber-400 text-xs font-bold text-stardew-wood flex items-center space-x-1.5">
-          <i data-lucide="map" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">雲端地圖</span>
+        <button id="btn-open-settings" class="memo-btn px-3 py-1.5 text-xs flex items-center space-x-1.5">
+          <i data-lucide="database" class="w-3.5 h-3.5"></i>
+          <span class="hidden sm:inline">設定 API</span>
         </button>
       </div>
     </div>
   </header>
 
   <!-- 主內容容器 -->
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-8 space-y-6">
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-8 space-y-8">
 
-    <!-- 📦 本月結餘 (Rollover Alert) -->
-    <div id="rollover-alert" class="hidden stardew-card p-5 bg-gradient-to-br from-amber-100 to-yellow-200 relative overflow-hidden">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-        <div class="flex items-start space-x-3">
-          <div class="w-12 h-12 rounded-lg bg-yellow-400 border-2 border-stardew-wood text-stardew-wood flex items-center justify-center shrink-0 shadow-[2px_2px_0_#78350f]">
-            <i data-lucide="package" class="w-6 h-6"></i>
+    <!-- 🎁 跨月結餘掉落 (Rollover Alert) -->
+    <div id="rollover-alert" class="hidden memo-card p-6 bg-white relative overflow-hidden">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+        <div class="flex items-start space-x-4">
+          <div class="w-12 h-12 bg-white text-black border-[3px] border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0_0_#1c1917]">
+            <i data-lucide="heart-handshake" class="w-6 h-6"></i>
           </div>
           <div>
-            <h3 class="font-pixel text-lg font-bold text-stardew-wood">📦 本月結餘：發現上月結餘！</h3>
-            <p class="text-sm text-amber-900 font-bold mt-1">皮埃爾的帳本顯示，上個月的【娛樂追星】資金還剩 <strong id="rollover-amount" class="text-stardew-berry text-lg">HK$ 0.00</strong>！</p>
+            <h3 class="text-lg font-black uppercase tracking-wide">📝 忍住沒亂買的獎勵！</h3>
+            <p class="text-sm font-bold mt-1 text-memo-muted">上個月的【快樂小廢物】額度竟然省下了 <strong id="rollover-amount" class="text-black text-lg border-b-2 border-black">HK$ 0.00</strong>！</p>
           </div>
         </div>
-        <div class="flex space-x-2">
-          <button id="btn-claim-gacha" class="stardew-btn px-3 py-2 text-xs font-bold rounded bg-amber-300 hover:bg-amber-200 text-stardew-wood">
-            加碼本月追星 (加到本月)
+        <div class="flex space-x-3">
+          <button id="btn-claim-gacha" class="memo-btn px-4 py-2.5 text-xs">
+            👉 及時行樂 (加到本月)！
           </button>
-          <button id="btn-claim-base" class="stardew-btn px-3 py-2 text-xs font-bold rounded bg-stardew-grass hover:bg-emerald-400 text-white border-stardew-wood">
-            存入鎮長金庫 (儲蓄)
+          <button id="btn-claim-base" class="memo-btn px-4 py-2.5 text-xs bg-black text-white hover:bg-white hover:text-black">
+            👉 存進演唱會基金！
           </button>
         </div>
       </div>
     </div>
 
-    <!-- 1. 動態資源槽 (日常與追星預算) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <!-- 日常生存模塊 -->
-      <div class="stardew-card p-5">
-        <div class="flex justify-between items-center mb-3 border-b-2 border-amber-200 pb-2">
-          <div class="flex items-center space-x-2">
-            <i data-lucide="sprout" class="w-5 h-5 text-stardew-grass"></i>
-            <span class="font-pixel text-lg font-bold text-stardew-wood">🚜 日常生存預算</span>
+    <!-- 1. 動態資源槽 (容仙本命預算小紙條) -->
+    <div class="memo-card p-6">
+      <h2 class="text-xl font-black mb-1 uppercase tracking-tight flex items-center">
+        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> 
+        🚨 警告：洗多一蚊，見少一次金容仙！
+      </h2>
+      <p class="text-sm font-bold text-memo-muted mb-6">（備註：緊急備用金絕對不動，此處僅監控日常與小廢物消耗）</p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- 基本與固定開支 -->
+        <div>
+          <div class="flex justify-between items-end mb-2">
+            <span class="text-sm font-black uppercase">🥪 基本與固定開支 (40%)</span>
+            <span id="basic-status-text" class="text-xs font-bold text-memo-muted">載入中...</span>
           </div>
-          <span class="text-xs font-bold bg-amber-200 text-amber-800 border-2 border-amber-300 px-2 py-0.5 rounded">佔比 45%</span>
+          <div class="memo-bar-bg mb-2">
+            <div id="basic-bar" class="memo-bar-fill w-0"></div>
+          </div>
+          <div class="text-right text-xs font-black" id="basic-ratio">0 / 7,200 HKD</div>
         </div>
-        <div class="flex justify-between text-sm font-bold mb-1.5 text-amber-900">
-          <span id="survival-status-text">載入中...</span>
-          <span id="survival-ratio">0 / 8,100</span>
-        </div>
-        <div class="w-full h-5 pixel-bar-bg">
-          <div id="survival-bar" class="bg-stardew-grass pixel-bar-fill w-0"></div>
-        </div>
-      </div>
 
-      <!-- 娛樂追星模塊 -->
-      <div class="stardew-card p-5">
-        <div class="flex justify-between items-center mb-3 border-b-2 border-amber-200 pb-2">
-          <div class="flex items-center space-x-2">
-            <i data-lucide="sparkles" class="w-5 h-5 text-stardew-berry"></i>
-            <span class="font-pixel text-lg font-bold text-stardew-wood">✨ 娛樂追星預算</span>
+        <!-- 快樂小廢物 -->
+        <div>
+          <div class="flex justify-between items-end mb-2">
+            <span class="text-sm font-black uppercase">✨ 快樂小廢物 (25%)</span>
+            <span id="gacha-status-text" class="text-xs font-bold text-memo-muted">載入中...</span>
           </div>
-          <span class="text-xs font-bold bg-amber-200 text-amber-800 border-2 border-amber-300 px-2 py-0.5 rounded">佔比 25%</span>
-        </div>
-        <div class="flex justify-between text-sm font-bold mb-1.5 text-amber-900">
-          <span id="gacha-status-text">載入中...</span>
-          <span id="gacha-ratio">0 / 4,500</span>
-        </div>
-        <div class="w-full h-5 pixel-bar-bg">
-          <div id="gacha-bar" class="bg-stardew-sky pixel-bar-fill w-0"></div>
+          <div class="memo-bar-bg mb-2">
+            <div id="gacha-bar" class="memo-bar-fill w-0"></div>
+          </div>
+          <div class="text-right text-xs font-black" id="gacha-ratio">0 / 4,500 HKD</div>
         </div>
       </div>
     </div>
 
-    <!-- 2. 戰績比對面板 (Core Stats Cards) -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <!-- 2. 追星戰報分析 (Core Stats Cards) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
       <!-- 總花費 -->
-      <div class="stardew-card p-5 bg-[#ffedd5]">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-bold text-amber-900">本月總花費 (G)</span>
-          <i data-lucide="shopping-basket" class="w-5 h-5 text-amber-700"></i>
+      <div class="memo-card p-5">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-sm font-black uppercase">本月手滑支出</span>
+          <i data-lucide="receipt" class="w-5 h-5"></i>
         </div>
-        <div class="font-pixel text-3xl font-bold text-stardew-wood mb-2" id="stat-expense">HK$ 0.00</div>
-        <div class="text-xs font-bold px-2 py-1 bg-amber-200 rounded border border-amber-300 inline-block text-amber-800" id="mom-expense-text">分析中...</div>
+        <div class="text-3xl font-black mb-4 tracking-tighter" id="stat-expense">HK$ 0.00</div>
+        <div class="text-xs font-bold px-3 py-2 bg-white border-[2px] border-black shadow-[2px_2px_0_0_#1c1917] inline-block" id="mom-expense-text">戰報分析中...</div>
       </div>
 
-      <!-- 儲蓄投資 -->
-      <div class="stardew-card p-5 bg-[#ecfdf5]">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-bold text-emerald-900">儲蓄投資 (G)</span>
-          <i data-lucide="piggy-bank" class="w-5 h-5 text-emerald-700"></i>
+      <!-- 簽售基金 + 備用金 -->
+      <div class="memo-card p-5 bg-gray-100">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-sm font-black uppercase">💰 簽售/備用金總額</span>
+          <i data-lucide="ticket" class="w-5 h-5"></i>
         </div>
-        <div class="font-pixel text-3xl font-bold text-emerald-700 mb-2" id="stat-saving">HK$ 0.00</div>
-        <div class="text-xs font-bold px-2 py-1 bg-emerald-200 rounded border border-emerald-300 inline-block text-emerald-800" id="mom-saving-text">分析中...</div>
+        <div class="text-3xl font-black mb-4 tracking-tighter" id="stat-saving">HK$ 0.00</div>
+        <div class="text-xs font-bold px-3 py-2 bg-white border-[2px] border-black shadow-[2px_2px_0_0_#1c1917] inline-block" id="mom-saving-text">戰報分析中...</div>
       </div>
 
-      <!-- 淨收入 -->
-      <div class="stardew-card p-5 bg-[#f0f9ff]">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-sm font-bold text-sky-900">農場淨收益 (G)</span>
-          <i data-lucide="wallet" class="w-5 h-5 text-sky-700"></i>
+      <!-- 淨結餘 -->
+      <div class="memo-card p-5">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-sm font-black uppercase">本月淨結餘</span>
+          <i data-lucide="piggy-bank" class="w-5 h-5"></i>
         </div>
-        <div class="font-pixel text-3xl font-bold text-sky-700 mb-2" id="stat-balance">HK$ 0.00</div>
-        <div class="text-xs font-bold text-sky-800">
-          總出貨：<span id="stat-income" class="text-sky-600">HK$ 0.00</span>
+        <div class="text-3xl font-black mb-4 tracking-tighter" id="stat-balance">HK$ 0.00</div>
+        <div class="text-xs font-bold text-memo-muted">
+          打工血汗錢：<span id="stat-income" class="text-black">HK$ 0.00</span>
         </div>
       </div>
     </div>
 
     <!-- 3. 主操作與視覺化區塊 -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-      <!-- 左側：填寫出貨單/帳單 (Add Transaction) -->
+      <!-- 左側：記帳表單 (Add Transaction) -->
       <div class="lg:col-span-5 space-y-6">
-        <div class="stardew-card p-6 bg-[#fffbeb]">
-          <h2 class="font-pixel text-xl font-bold text-stardew-wood mb-5 flex items-center space-x-2 border-b-2 border-amber-200 pb-2">
-            <i data-lucide="pen-tool" class="w-5 h-5 text-amber-600"></i>
-            <span>填寫新帳單</span>
+        <div class="memo-card p-6">
+          <h2 class="text-xl font-black mb-6 uppercase tracking-tight border-b-[3px] border-black pb-3">
+            ✏️ 新增手帳紀錄
           </h2>
 
-          <form id="tx-form" class="space-y-4">
+          <form id="tx-form" class="space-y-5">
             <div>
-              <label class="block text-sm font-bold text-amber-900 mb-1.5">行動類型</label>
-              <div class="grid grid-cols-3 gap-2 p-1 bg-amber-100 rounded-lg border-2 border-amber-200">
-                <button type="button" data-type="expense" class="type-btn active stardew-btn py-2 rounded bg-stardew-berry text-white text-sm font-bold border-stardew-wood">
-                  花費購買
+              <label class="block text-sm font-black mb-2 uppercase">類型</label>
+              <div class="grid grid-cols-3 gap-3">
+                <button type="button" data-type="expense" class="type-btn active memo-btn py-3 text-sm">
+                  手滑支出
                 </button>
-                <button type="button" data-type="income" class="type-btn py-2 rounded bg-amber-50 text-amber-700 text-sm font-bold hover:bg-amber-200 border-2 border-transparent">
-                  出貨收入
+                <button type="button" data-type="income" class="type-btn memo-btn py-3 text-sm bg-gray-100 text-gray-400 border-gray-400 shadow-none hover:bg-gray-200 hover:text-black">
+                  血汗入帳
                 </button>
-                <button type="button" data-type="saving" class="type-btn py-2 rounded bg-amber-50 text-amber-700 text-sm font-bold hover:bg-amber-200 border-2 border-transparent">
-                  儲蓄投資
+                <button type="button" data-type="saving" class="type-btn memo-btn py-3 text-sm bg-gray-100 text-gray-400 border-gray-400 shadow-none hover:bg-gray-200 hover:text-black">
+                  存見面金
                 </button>
               </div>
               <input type="hidden" id="tx-type" value="expense">
             </div>
 
             <div>
-              <label class="block text-sm font-bold text-amber-900 mb-1.5">金幣與匯率</label>
-              <div class="flex rounded border-2 border-stardew-wood overflow-hidden focus-within:border-amber-500 bg-white shadow-inner">
-                <select id="tx-currency" class="bg-amber-100 text-amber-900 text-sm font-bold px-3 py-2.5 outline-none border-r-2 border-stardew-wood">
+              <label class="block text-sm font-black mb-2 uppercase">金額與幣別</label>
+              <div class="flex border-[3px] border-black bg-white shadow-[4px_4px_0_0_#1c1917] focus-within:translate-x-[2px] focus-within:translate-y-[2px] focus-within:shadow-[2px_2px_0_0_#1c1917] transition-all">
+                <select id="tx-currency" class="bg-gray-100 text-black text-sm font-black px-4 py-3 outline-none border-r-[3px] border-black cursor-pointer">
                   <option value="HKD">HKD</option>
                   <option value="KRW">KRW</option>
                   <option value="JPY">JPY</option>
                   <option value="USD">USD</option>
                 </select>
-                <input type="number" step="any" id="tx-amount" placeholder="0.00" required class="flex-1 bg-transparent px-3.5 py-2.5 text-lg text-stardew-wood font-bold outline-none placeholder:text-amber-300">
+                <input type="number" step="any" id="tx-amount" placeholder="0.00" required class="flex-1 bg-transparent px-4 py-3 text-lg font-black outline-none placeholder:text-gray-300">
               </div>
 
-              <div id="conversion-preview" class="hidden mt-2 px-3 py-2 rounded bg-sky-100 border-2 border-sky-300 text-xs text-sky-800 flex items-center justify-between font-bold">
-                <div class="flex items-center space-x-1.5">
-                  <i data-lucide="coins" class="w-4 h-4 text-yellow-500"></i>
-                  <span>折合本鎮貨幣：</span>
+              <div id="conversion-preview" class="hidden mt-3 px-4 py-3 bg-gray-100 border-[2px] border-black shadow-[2px_2px_0_0_#1c1917] text-xs flex items-center justify-between font-black uppercase">
+                <div class="flex items-center space-x-2">
+                  <i data-lucide="arrow-right-left" class="w-4 h-4"></i>
+                  <span>折合港幣：</span>
                 </div>
-                <span class="font-pixel text-base text-sky-700" id="preview-hkd-val">HK$ 0.00</span>
+                <span class="text-base" id="preview-hkd-val">HK$ 0.00</span>
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-2 gap-5">
               <div>
-                <label class="block text-sm font-bold text-amber-900 mb-1.5">種類</label>
-                <select id="tx-category" class="w-full bg-white border-2 border-stardew-wood rounded px-3 py-2 text-sm text-stardew-wood outline-none focus:border-amber-500 font-bold shadow-inner">
+                <label class="block text-sm font-black mb-2 uppercase">分類</label>
+                <select id="tx-category" class="w-full bg-white border-[3px] border-black px-3 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#1c1917] cursor-pointer">
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-bold text-amber-900 mb-1.5">日曆日期</label>
-                <input type="date" id="tx-date" required class="w-full bg-white border-2 border-stardew-wood rounded px-3 py-2 text-sm text-stardew-wood outline-none focus:border-amber-500 font-bold shadow-inner">
+                <label class="block text-sm font-black mb-2 uppercase">日期</label>
+                <input type="date" id="tx-date" required class="w-full bg-white border-[3px] border-black px-3 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#1c1917]">
               </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-3">
+            <div class="grid grid-cols-1 gap-5">
               <div>
-                <label class="block text-sm font-bold text-amber-900 mb-1.5">錢包來源</label>
-                <select id="tx-account" class="w-full bg-white border-2 border-stardew-wood rounded px-3 py-2 text-sm text-stardew-wood outline-none focus:border-amber-500 font-bold shadow-inner">
-                  <option value="信用卡">銀行支票 (Credit Card)</option>
-                  <option value="現金">口袋金幣 (Cash)</option>
-                  <option value="銀行轉帳">鎮長轉帳 (Transfer)</option>
-                  <option value="八達通/電子錢包">電子儲值卡 (E-Wallet)</option>
+                <label class="block text-sm font-black mb-2 uppercase">支付方式</label>
+                <select id="tx-account" class="w-full bg-white border-[3px] border-black px-3 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#1c1917] cursor-pointer">
+                  <option value="信用卡">信用卡刷下去</option>
+                  <option value="現金">現金鈔票</option>
+                  <option value="銀行轉帳">銀行轉帳/FPS</option>
+                  <option value="八達通/電子錢包">八達通/PayMe</option>
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-bold text-amber-900 mb-1.5">農場日記 (備註)</label>
-                <input type="text" id="tx-note" placeholder="例如：購買演唱會門票..." class="w-full bg-white border-2 border-stardew-wood rounded px-3 py-2.5 text-sm text-stardew-wood outline-none focus:border-amber-500 placeholder:text-amber-300 font-bold shadow-inner">
+                <label class="block text-sm font-black mb-2 uppercase">備註說明</label>
+                <input type="text" id="tx-note" placeholder="例如：買了Solar新專..." class="w-full bg-white border-[3px] border-black px-4 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#1c1917] placeholder:text-gray-400">
               </div>
             </div>
 
-            <button type="submit" id="btn-submit" class="w-full mt-4 bg-emerald-500 hover:bg-emerald-400 text-white font-pixel text-lg py-3 rounded-lg stardew-btn flex items-center justify-center space-x-2">
-              <i data-lucide="book-open" class="w-5 h-5"></i>
-              <span id="btn-submit-text">記下這筆帳</span>
+            <button type="submit" id="btn-submit" class="w-full mt-6 memo-btn bg-black text-white text-base py-4 hover:bg-white hover:text-black">
+              <span id="btn-submit-text" class="flex justify-center items-center gap-2">
+                <i data-lucide="check" class="w-5 h-5"></i> 記低這筆帳！
+              </span>
             </button>
           </form>
         </div>
@@ -304,38 +312,37 @@
 
       <!-- 右側：歷史帳本 (Transaction List) -->
       <div class="lg:col-span-7 space-y-4">
-        <div class="stardew-card p-6 h-full flex flex-col bg-[#fffbeb]">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b-2 border-amber-200 gap-3">
+        <div class="memo-card p-6 h-full flex flex-col">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b-[3px] border-black gap-4">
             <div>
-              <h2 class="font-pixel text-xl font-bold text-stardew-wood flex items-center space-x-2">
-                <i data-lucide="scroll-text" class="w-6 h-6 text-amber-600"></i>
-                <span>歷史帳本</span>
+              <h2 class="text-xl font-black uppercase tracking-tight flex items-center space-x-2">
+                <i data-lucide="archive" class="w-6 h-6"></i>
+                <span>歷史手帳紀錄</span>
               </h2>
-              <p class="text-xs font-bold text-amber-700 mt-1">從皮埃爾的雲端資料庫讀取中...</p>
             </div>
-            <div class="flex items-center space-x-2">
-              <button id="btn-manual-sync" class="stardew-btn px-3 py-1.5 rounded bg-amber-200 hover:bg-amber-300 text-xs font-bold text-stardew-wood flex items-center space-x-1.5">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="sync-spin-icon"></i>
-                <span>翻閱最新</span>
+            <div class="flex items-center space-x-3">
+              <button id="btn-manual-sync" class="memo-btn px-3 py-2 text-xs flex items-center space-x-1.5 shadow-[2px_2px_0_0_#1c1917]">
+                <i data-lucide="refresh-cw" class="w-4 h-4" id="sync-spin-icon"></i>
+                <span>刷新</span>
               </button>
-              <button id="btn-export-csv" class="stardew-btn px-3 py-1.5 rounded bg-amber-200 hover:bg-amber-300 text-xs font-bold text-stardew-wood flex items-center space-x-1.5">
-                <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                <span>備份帳本</span>
+              <button id="btn-export-csv" class="memo-btn px-3 py-2 text-xs flex items-center space-x-1.5 shadow-[2px_2px_0_0_#1c1917]">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>匯出</span>
               </button>
             </div>
           </div>
 
-          <div class="flex items-center space-x-2 py-3 overflow-x-auto text-xs font-bold">
-            <button data-filter="all" class="filter-btn px-3 py-1.5 rounded bg-amber-500 text-white border-2 border-stardew-wood shadow-[1px_2px_0_#78350f]">全部記錄</button>
-            <button data-filter="expense" class="filter-btn px-3 py-1.5 rounded bg-amber-100 text-amber-800 border-2 border-amber-300 hover:bg-amber-200 transition-all">花費</button>
-            <button data-filter="income" class="filter-btn px-3 py-1.5 rounded bg-amber-100 text-amber-800 border-2 border-amber-300 hover:bg-amber-200 transition-all">出貨</button>
-            <button data-filter="saving" class="filter-btn px-3 py-1.5 rounded bg-amber-100 text-amber-800 border-2 border-amber-300 hover:bg-amber-200 transition-all">建設</button>
+          <div class="flex items-center space-x-3 py-5 overflow-x-auto text-xs font-black uppercase">
+            <button data-filter="all" class="filter-btn memo-btn bg-black text-white px-4 py-2 shadow-[2px_2px_0_0_#1c1917]">全部</button>
+            <button data-filter="expense" class="filter-btn memo-btn bg-white text-black px-4 py-2 shadow-[2px_2px_0_0_#1c1917] hover:bg-black hover:text-white">支出</button>
+            <button data-filter="income" class="filter-btn memo-btn bg-white text-black px-4 py-2 shadow-[2px_2px_0_0_#1c1917] hover:bg-black hover:text-white">收入</button>
+            <button data-filter="saving" class="filter-btn memo-btn bg-white text-black px-4 py-2 shadow-[2px_2px_0_0_#1c1917] hover:bg-black hover:text-white">簽售/備用金</button>
           </div>
 
-          <div id="tx-list" class="space-y-3 overflow-y-auto max-h-[540px] pr-2 custom-scrollbar flex-1 pt-2">
-            <div class="text-center py-12 text-amber-700 space-y-2">
-              <i data-lucide="loader" class="w-8 h-8 mx-auto animate-spin"></i>
-              <p class="text-sm font-bold">正在拍去帳本上的灰塵...</p>
+          <div id="tx-list" class="space-y-4 overflow-y-auto max-h-[540px] pr-3 custom-scrollbar flex-1 pb-4">
+            <div class="text-center py-16 space-y-4">
+              <i data-lucide="loader" class="w-10 h-10 mx-auto animate-spin"></i>
+              <p class="text-sm font-black uppercase">努力載入雲端紀錄中...</p>
             </div>
           </div>
         </div>
@@ -345,26 +352,26 @@
   </main>
 
   <!-- 雲端設定彈窗 -->
-  <div id="settings-modal" class="fixed inset-0 z-50 bg-stardew-wood/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="stardew-card w-full max-w-md p-6 bg-[#fffbeb] space-y-4">
-      <div class="flex items-center justify-between border-b-2 border-amber-200 pb-2">
-        <h3 class="font-pixel text-xl font-bold text-stardew-wood flex items-center space-x-2">
-          <i data-lucide="map" class="w-5 h-5 text-amber-600"></i>
-          <span>連結小鎮雲端</span>
+  <div id="settings-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="memo-card w-full max-w-md p-8 space-y-6">
+      <div class="flex items-center justify-between border-b-[3px] border-black pb-4">
+        <h3 class="text-xl font-black uppercase flex items-center space-x-2">
+          <i data-lucide="settings" class="w-6 h-6"></i>
+          <span>雲端 API 設定</span>
         </h3>
-        <button id="btn-close-modal" class="text-amber-700 hover:text-stardew-berry">
+        <button id="btn-close-modal" class="hover:bg-black hover:text-white border-[2px] border-transparent hover:border-black transition-colors p-1">
           <i data-lucide="x" class="w-6 h-6"></i>
         </button>
       </div>
-      <p class="text-sm text-amber-900 font-bold leading-relaxed">
-        請提供 Google Apps Script 網址。鎮長需要這個才能將你的帳本與雲端同步。
+      <p class="text-sm font-bold text-memo-muted">
+        請貼上 Google Apps Script 網址，確保你的心血紀錄萬無一失。
       </p>
       <div>
-        <label class="block text-xs font-bold text-amber-800 mb-1">API 網址</label>
-        <input type="url" id="api-url-input" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-white border-2 border-stardew-wood rounded px-3 py-2.5 text-xs text-stardew-wood outline-none focus:border-amber-500 shadow-inner">
+        <label class="block text-xs font-black uppercase mb-2">API 網址</label>
+        <input type="url" id="api-url-input" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-white border-[3px] border-black px-4 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#1c1917] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[2px_2px_0_0_#1c1917] transition-all">
       </div>
-      <div class="flex space-x-3 pt-2">
-        <button id="btn-save-api" class="flex-1 bg-stardew-grass hover:bg-emerald-400 text-white font-pixel text-lg py-2.5 rounded stardew-btn">確定連結</button>
+      <div class="pt-4">
+        <button id="btn-save-api" class="w-full memo-btn bg-black text-white text-base py-3 hover:bg-white hover:text-black">確定連線</button>
       </div>
     </div>
   </div>
@@ -373,24 +380,27 @@
     // 匯率狀態
     let exchangeRates = { HKD: 1.0, KRW: 0.0056, JPY: 0.051, USD: 7.82 };
     
-    // 星露谷預算設定
+    // MooMoo 本命預算設定 (月薪 18,000 HKD)
     const BUDGET = {
-      SURVIVAL: 8100, // 45% (日常生存)
-      GACHA: 4500,    // 25% (娛樂追星)
-      BASE: 5400      // 30% (儲蓄投資)
+      BASIC: 7200,   // 40% (基本與固定開支)
+      WASTE: 4500    // 25% (快樂小廢物)
+      // 簽售 4500 (25%) & 備用金 1800 (10%) 歸類在 Saving，不納入上方消耗進度條
     };
 
     const categories = {
       expense: [
-        '餐飲美食', '交通通勤', '生活帳單', // 屬日常生存
-        '演唱會/周邊', '粉絲俱樂部/會員', '休閒娛樂', '其他購物' // 屬娛樂追星
+        '餐飲', '交通', '水電', '固定支出 (房租/訂閱)', // 基本開支
+        '買專', '周邊', '蘿蔔燈', '保養護膚' // 快樂小廢物
       ],
-      income: ['薪資收入', '布告欄任務', '投資回報', '其他收入'],
-      saving: ['股票/基金', '定期存款', '緊急備用金'] // 屬儲蓄投資
+      income: ['打工/薪水', '其他收入'],
+      saving: [
+        '韓國機票', '演唱會門票', '買百張專抽簽售', // 簽售基金
+        '未來的醫療備用', '突發重大事故專用' // 絕對不動緊急金
+      ]
     };
 
-    const survivalCats = ['餐飲美食', '交通通勤', '生活帳單'];
-    const gachaCats = ['演唱會/周邊', '粉絲俱樂部/會員', '休閒娛樂', '其他購物'];
+    const basicCats = ['餐飲', '交通', '水電', '固定支出 (房租/訂閱)'];
+    const wasteCats = ['買專', '周邊', '蘿蔔燈', '保養護膚'];
 
     let transactions = JSON.parse(localStorage.getItem('smartspend_records')) || [];
     let currentFilter = 'all';
@@ -417,20 +427,20 @@
           }
         }
       } catch (err) {
-        console.warn('Network Error: Using default rates', err);
+        console.warn('Network Error', err);
       }
     }
 
     // 雲端同步
     async function syncFromCloud() {
       if (!apiUrl) {
-        updateSyncStatus(false, '需要地圖座標...');
+        updateSyncStatus(false, '尚未連線');
         document.getElementById('settings-modal').classList.remove('hidden');
         renderDashboard();
         return;
       }
 
-      updateSyncStatus(null, '呼叫貓頭鷹中...');
+      updateSyncStatus(null, '同步中...');
       const spinIcon = document.getElementById('sync-spin-icon');
       if (spinIcon) spinIcon.classList.add('animate-spin');
 
@@ -440,12 +450,12 @@
           const data = await res.json();
           transactions = Array.isArray(data) ? data : [];
           localStorage.setItem('smartspend_records', JSON.stringify(transactions));
-          updateSyncStatus(true, '已與村莊同步');
+          updateSyncStatus(true, '同步成功');
         } else {
           throw new Error('讀取失敗');
         }
       } catch (err) {
-        updateSyncStatus(false, '暴風雨斷線');
+        updateSyncStatus(false, '同步失敗');
       } finally {
         if (spinIcon) spinIcon.classList.remove('animate-spin');
         renderDashboard();
@@ -457,11 +467,11 @@
       const label = document.getElementById('sync-status');
       label.textContent = text;
       if (isSuccess === true) {
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-300 inline-block border border-stardew-wood';
+        dot.className = 'w-2.5 h-2.5 bg-black border-2 border-black inline-block';
       } else if (isSuccess === false) {
-        dot.className = 'w-2 h-2 rounded-full bg-rose-400 inline-block border border-stardew-wood';
+        dot.className = 'w-2.5 h-2.5 bg-white border-2 border-black inline-block cross-pattern';
       } else {
-        dot.className = 'w-2 h-2 rounded-full bg-amber-300 animate-pulse inline-block border border-stardew-wood';
+        dot.className = 'w-2.5 h-2.5 bg-gray-400 border-2 border-black animate-pulse inline-block';
       }
     }
 
@@ -485,14 +495,9 @@
           const type = e.currentTarget.dataset.type;
           document.getElementById('tx-type').value = type;
           document.querySelectorAll('.type-btn').forEach(b => {
-            b.className = 'type-btn py-2 rounded bg-amber-50 text-amber-700 text-sm font-bold hover:bg-amber-200 border-2 border-transparent';
+            b.className = 'type-btn memo-btn py-3 text-sm bg-gray-100 text-gray-400 border-gray-400 shadow-none hover:bg-gray-200 hover:text-black';
           });
-          const activeClass = {
-            expense: 'bg-stardew-berry text-white stardew-btn border-stardew-wood',
-            income: 'bg-sky-500 text-white stardew-btn border-stardew-wood',
-            saving: 'bg-stardew-grass text-white stardew-btn border-stardew-wood'
-          };
-          e.currentTarget.className = `type-btn active py-2 rounded text-sm font-bold ${activeClass[type]}`;
+          e.currentTarget.className = `type-btn active memo-btn py-3 text-sm`;
           renderCategoryOptions(type);
           updatePreview();
         });
@@ -531,9 +536,9 @@
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           document.querySelectorAll('.filter-btn').forEach(b => {
-            b.className = 'filter-btn px-3 py-1.5 rounded bg-amber-100 text-amber-800 border-2 border-amber-300 hover:bg-amber-200 transition-all';
+            b.className = 'filter-btn memo-btn bg-white text-black px-4 py-2 shadow-[2px_2px_0_0_#1c1917] hover:bg-black hover:text-white';
           });
-          e.currentTarget.className = 'filter-btn px-3 py-1.5 rounded bg-amber-500 text-white border-2 border-stardew-wood shadow-[1px_2px_0_#78350f]';
+          e.currentTarget.className = 'filter-btn memo-btn bg-black text-white px-4 py-2 shadow-[2px_2px_0_0_#1c1917]';
           currentFilter = e.currentTarget.dataset.filter;
           renderList();
         });
@@ -596,10 +601,10 @@
       document.getElementById('conversion-preview').classList.add('hidden');
 
       if (apiUrl) {
-        updateSyncStatus(null, '貓頭鷹運送中...');
+        updateSyncStatus(null, '傳輸中...');
         try {
           await fetch(apiUrl, { method: 'POST', body: JSON.stringify({ action: 'add', data: newTx }) });
-          updateSyncStatus(true, '已與村莊同步');
+          updateSyncStatus(true, '同步成功');
         } catch (err) {
           updateSyncStatus(false, '傳送失敗 (留存本地)');
         }
@@ -607,16 +612,16 @@
     }
 
     window.deleteTx = async function(id) {
-      if (!confirm('確定要撕掉這頁帳本嗎？')) return;
+      if (!confirm('確定要撕掉這張紀錄嗎？')) return;
       transactions = transactions.filter(t => t.id !== id);
       localStorage.setItem('smartspend_records', JSON.stringify(transactions));
       renderDashboard();
 
       if (apiUrl) {
-        updateSyncStatus(null, '貓頭鷹運送中...');
+        updateSyncStatus(null, '傳輸中...');
         try {
           await fetch(apiUrl, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) });
-          updateSyncStatus(true, '已與村莊同步');
+          updateSyncStatus(true, '同步成功');
         } catch (err) {
           updateSyncStatus(false, '刪除失敗');
         }
@@ -639,14 +644,14 @@
         const newTx = {
           id: Date.now().toString(),
           type: 'saving',
-          category: '緊急備用金',
+          category: '演唱會門票',
           originalAmount: remainingGacha,
           currency: 'HKD',
           rate: 1.0,
           amountHKD: remainingGacha,
           date: new Date().toISOString().split('T')[0],
-          account: '鎮長轉帳',
-          note: `本月結餘：上月娛樂結餘存入儲蓄`
+          account: '銀行轉帳',
+          note: `📝 忍住沒亂買的獎勵！(上月小廢物結餘)`
         };
         transactions.unshift(newTx);
         localStorage.setItem('smartspend_records', JSON.stringify(transactions));
@@ -662,8 +667,8 @@
     function renderDashboard() {
       let currExpense = 0, currIncome = 0, currSaving = 0;
       let lastExpense = 0, lastSaving = 0;
-      let currSurvivalSpent = 0, currGachaSpent = 0;
-      let lastGachaSpent = 0;
+      let currBasicSpent = 0, currWasteSpent = 0;
+      let lastWasteSpent = 0;
 
       transactions.forEach(t => {
         const isCurrent = t.date.startsWith(currentMonthStr);
@@ -672,8 +677,8 @@
         if (isCurrent) {
           if (t.type === 'expense') {
             currExpense += t.amountHKD;
-            if(survivalCats.includes(t.category)) currSurvivalSpent += t.amountHKD;
-            if(gachaCats.includes(t.category)) currGachaSpent += t.amountHKD;
+            if(basicCats.includes(t.category)) currBasicSpent += t.amountHKD;
+            if(wasteCats.includes(t.category)) currWasteSpent += t.amountHKD;
           }
           if (t.type === 'income') currIncome += t.amountHKD;
           if (t.type === 'saving') currSaving += t.amountHKD;
@@ -682,7 +687,7 @@
         if (isLast) {
           if (t.type === 'expense') {
             lastExpense += t.amountHKD;
-            if(gachaCats.includes(t.category)) lastGachaSpent += t.amountHKD;
+            if(wasteCats.includes(t.category)) lastWasteSpent += t.amountHKD;
           }
           if (t.type === 'saving') lastSaving += t.amountHKD;
         }
@@ -696,69 +701,69 @@
       document.getElementById('stat-balance').textContent = fmt(netBalance);
       document.getElementById('stat-income').textContent = fmt(currIncome);
 
-      // --- 戰績對比 (MoM) ---
+      // --- 追星戰報分析 (MoM) ---
       const expenseDiff = currExpense - lastExpense;
       const momExpEl = document.getElementById('mom-expense-text');
       if (expenseDiff > 0) {
-        momExpEl.innerHTML = `<span class="text-rose-600">注意：本月花費比上月多 ${fmt(Math.abs(expenseDiff))}</span>`;
+        momExpEl.innerHTML = `安堆！這個月比上個月多花了 ${fmt(Math.abs(expenseDiff))}，離容仙又遠了一步ㅠㅠ`;
       } else if (expenseDiff < 0) {
-        momExpEl.innerHTML = `<span class="text-emerald-700">解鎖成就：本月花費比上月省了 ${fmt(Math.abs(expenseDiff))}！</span>`;
+        momExpEl.innerHTML = `大發！這個月支出比上個月省了 ${fmt(Math.abs(expenseDiff))}，可以多買兩張專了！`;
       } else {
-        momExpEl.innerHTML = `<span class="text-amber-700">花費與上月持平</span>`;
+        momExpEl.innerHTML = `跟上個月一樣克制，繼續保持！`;
       }
 
       const savingDiff = currSaving - lastSaving;
       const momSavEl = document.getElementById('mom-saving-text');
       if (savingDiff >= 0) {
-        momSavEl.innerHTML = `<span class="text-emerald-700">儲蓄投資穩步增長 (+${fmt(savingDiff)})</span>`;
+        momSavEl.innerHTML = `簽售基金壯大中 (+${fmt(savingDiff)})，衝啊！`;
       } else {
-        momSavEl.innerHTML = `<span class="text-amber-700">投資金額略低於上月 (-${fmt(Math.abs(savingDiff))})</span>`;
+        momSavEl.innerHTML = `存錢速度變慢了 (-${fmt(Math.abs(savingDiff))})，要繃緊神經！`;
       }
 
-      // --- 進度條更新 ---
-      // Survival Bar
-      const survPct = Math.min(100, (currSurvivalSpent / BUDGET.SURVIVAL) * 100);
-      const survBar = document.getElementById('survival-bar');
-      const survText = document.getElementById('survival-status-text');
-      document.getElementById('survival-ratio').textContent = `${currSurvivalSpent.toLocaleString()} / ${BUDGET.SURVIVAL.toLocaleString()}`;
-      survBar.style.width = `${survPct}%`;
+      // --- 預算紙條更新 ---
+      // Basic Bar
+      const basicPct = Math.min(100, (currBasicSpent / BUDGET.BASIC) * 100);
+      const basicBar = document.getElementById('basic-bar');
+      const basicText = document.getElementById('basic-status-text');
+      document.getElementById('basic-ratio').textContent = `${currBasicSpent.toLocaleString()} / ${BUDGET.BASIC.toLocaleString()} HKD`;
+      basicBar.style.width = `${basicPct}%`;
       
-      if(survPct < 60) {
-        survBar.className = "bg-stardew-grass pixel-bar-fill";
-        survText.innerHTML = '<span class="text-emerald-700">物資充足，是個好天氣！</span>';
-      } else if (survPct < 85) {
-        survBar.className = "bg-amber-500 pixel-bar-fill";
-        survText.innerHTML = '<span class="text-amber-600">生活開銷過半，注意庫存。</span>';
+      if(basicPct < 60) {
+        basicBar.className = "memo-bar-fill"; // Solid black
+        basicText.innerHTML = '正常消耗，活下去才能見容仙！';
+      } else if (basicPct < 85) {
+        basicBar.className = "memo-bar-fill bar-warning"; // Striped
+        basicText.innerHTML = '伙食費有點高囉？';
       } else {
-        survBar.className = "bg-rose-500 pixel-bar-fill";
-        survText.innerHTML = '<span class="text-rose-600">警告：即將沒有多餘的蘿蔔了！</span>';
+        basicBar.className = "memo-bar-fill"; // Solid black
+        basicText.innerHTML = '<span class="font-black line-through decoration-2">準備去食樹皮！</span>';
       }
 
-      // Gacha Bar (含 Rollover Bonus)
-      let currentGachaBudget = BUDGET.GACHA;
+      // Waste (Gacha) Bar (含 Rollover Bonus)
+      let currentWasteBudget = BUDGET.WASTE;
       let gachaBonus = parseFloat(localStorage.getItem(`gacha_bonus_${currentMonthStr}`)) || 0;
-      currentGachaBudget += gachaBonus;
+      currentWasteBudget += gachaBonus;
 
-      const gachaPct = Math.min(100, (currGachaSpent / currentGachaBudget) * 100);
+      const wastePct = Math.min(100, (currWasteSpent / currentWasteBudget) * 100);
       const gachaBar = document.getElementById('gacha-bar');
       const gachaText = document.getElementById('gacha-status-text');
-      document.getElementById('gacha-ratio').textContent = `${currGachaSpent.toLocaleString()} / ${currentGachaBudget.toLocaleString()}`;
-      gachaBar.style.width = `${gachaPct}%`;
+      document.getElementById('gacha-ratio').textContent = `${currWasteSpent.toLocaleString()} / ${currentWasteBudget.toLocaleString()} HKD`;
+      gachaBar.style.width = `${wastePct}%`;
 
-      if(gachaPct < 60) {
-        gachaBar.className = "bg-sky-400 pixel-bar-fill";
-        gachaText.innerHTML = '<span class="text-sky-600">資金足夠，去快樂追星吧！</span>';
-      } else if (gachaPct < 85) {
-        gachaBar.className = "bg-amber-400 pixel-bar-fill";
-        gachaText.innerHTML = '<span class="text-amber-600">娛樂資金警戒！</span>';
+      if(wastePct < 60) {
+        gachaBar.className = "memo-bar-fill";
+        gachaText.innerHTML = '錢包很乖，離簽售會又近了一步！';
+      } else if (wastePct < 85) {
+        gachaBar.className = "memo-bar-fill bar-warning"; // Striped
+        gachaText.innerHTML = '喂喂，再買下去就沒錢飛首爾了喔！';
       } else {
-        gachaBar.className = "bg-rose-500 pixel-bar-fill";
-        gachaText.innerHTML = '<span class="text-rose-600">皮埃爾拒絕賒帳：預算已空！</span>';
+        gachaBar.className = "memo-bar-fill";
+        gachaText.innerHTML = '<span class="font-black line-through decoration-2">預算見底！準備食樹皮！</span>';
       }
 
       // --- Rollover 系統檢測 ---
       const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthStr}`);
-      const lastMonthRemaining = BUDGET.GACHA - lastGachaSpent;
+      const lastMonthRemaining = BUDGET.WASTE - lastWasteSpent;
       if (!hasClaimed && lastMonthRemaining > 0 && transactions.some(t => t.date.startsWith(lastMonthStr))) {
         window.lastMonthGachaRemaining = lastMonthRemaining;
         document.getElementById('rollover-amount').textContent = `HK$ ${lastMonthRemaining.toLocaleString()}`;
@@ -774,9 +779,9 @@
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-12 text-amber-700/50 space-y-2">
-            <i data-lucide="book-dashed" class="w-10 h-10 mx-auto"></i>
-            <p class="text-sm font-bold">這頁還是空白的...</p>
+          <div class="text-center py-16 space-y-3">
+            <i data-lucide="file-dashed" class="w-10 h-10 mx-auto text-gray-300"></i>
+            <p class="text-sm font-black uppercase text-gray-400">目前還是空白的，快點記帳吧！</p>
           </div>
         `;
         lucide.createIcons();
@@ -785,51 +790,56 @@
 
       let html = '';
       filtered.forEach(item => {
-        let badgeColor = 'bg-rose-100 text-rose-700 border-rose-300';
         let sign = '-';
-        let iconName = 'shopping-bag';
+        let iconName = 'shopping-cart';
+        
+        // 單色調邏輯：用邊框粗細與背景反差來區分
+        let borderStyle = 'border-2 border-gray-300';
+        let iconBg = 'bg-white text-black';
 
         if (item.type === 'income') {
-          badgeColor = 'bg-sky-100 text-sky-700 border-sky-300';
           sign = '+';
-          iconName = 'gem';
+          iconName = 'wallet';
+          borderStyle = 'border-[3px] border-black shadow-[2px_2px_0_0_#1c1917]';
+          iconBg = 'bg-black text-white';
         } else if (item.type === 'saving') {
-          badgeColor = 'bg-emerald-100 text-emerald-700 border-emerald-300';
           sign = '';
-          iconName = 'hammer';
+          iconName = 'ticket';
+          borderStyle = 'border-2 border-black border-dashed';
+          iconBg = 'bg-gray-200 text-black';
         }
 
         const isForeign = item.currency !== 'HKD';
         const origText = isForeign 
-          ? `<span class="text-xs text-amber-500 font-bold ml-1">(${item.originalAmount.toLocaleString()} ${item.currency})</span>` 
+          ? `<span class="text-xs font-black ml-2 underline decoration-2">(${item.originalAmount.toLocaleString()} ${item.currency})</span>` 
           : '';
 
         html += `
-          <div class="p-3.5 rounded-lg bg-white border-2 border-amber-200 hover:border-amber-400 hover:shadow-md transition-all flex items-center justify-between group">
-            <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 rounded-lg ${badgeColor} border-2 flex items-center justify-center shrink-0">
+          <div class="p-4 bg-white ${borderStyle} hover:bg-gray-50 transition-colors flex items-center justify-between group">
+            <div class="flex items-center space-x-4">
+              <div class="w-10 h-10 ${iconBg} border-[2px] border-black flex items-center justify-center shrink-0">
                 <i data-lucide="${iconName}" class="w-5 h-5"></i>
               </div>
               <div>
                 <div class="flex items-center space-x-2">
-                  <span class="text-sm font-bold text-amber-900">${item.category}</span>
-                  <span class="text-[10px] px-1.5 py-0.5 rounded ${badgeColor} border font-bold">${item.account}</span>
+                  <span class="text-sm font-black">${item.category}</span>
+                  <span class="text-[10px] px-1.5 py-0.5 border-2 border-black font-black uppercase">${item.account}</span>
                 </div>
-                <div class="text-xs text-amber-600 flex items-center space-x-2 mt-0.5 font-bold">
+                <div class="text-xs text-memo-muted flex items-center space-x-2 mt-1 font-bold">
                   <span>${item.date}</span>
-                  ${item.note ? `<span class="text-amber-300">|</span><span class="truncate max-w-[120px] sm:max-w-[200px] text-amber-700">${item.note}</span>` : ''}
+                  ${item.note ? `<span class="text-gray-300">|</span><span class="truncate max-w-[120px] sm:max-w-[200px] text-black">${item.note}</span>` : ''}
                 </div>
               </div>
             </div>
             <div class="flex items-center space-x-3">
               <div class="text-right">
-                <div class="font-pixel text-lg ${item.type === 'income' ? 'text-sky-600' : (item.type === 'saving' ? 'text-emerald-600' : 'text-stardew-berry')}">
+                <div class="text-lg font-black">
                   ${sign}HK$ ${item.amountHKD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
                 ${origText}
               </div>
-              <button onclick="deleteTx('${item.id}')" class="opacity-0 group-hover:opacity-100 text-amber-300 hover:text-stardew-berry transition-all p-1" title="擦掉紀錄">
-                <i data-lucide="eraser" class="w-5 h-5"></i>
+              <button onclick="deleteTx('${item.id}')" class="opacity-0 group-hover:opacity-100 border-[2px] border-black bg-white p-1.5 hover:bg-black hover:text-white transition-all shadow-[2px_2px_0_0_#1c1917]" title="撕掉紀錄">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
           </div>
@@ -840,7 +850,7 @@
     }
 
     function exportToCSV() {
-      if (transactions.length === 0) return alert('帳本是空的！');
+      if (transactions.length === 0) return alert('目前沒有紀錄可以匯出！');
       let csv = '\uFEFF日期,類型,類別,原始金額,幣別,參考匯率,折算港幣(HKD),帳戶,備註\n';
       transactions.forEach(t => {
         csv += `"${t.date}","${t.type}","${t.category}","${t.originalAmount}","${t.currency}","${t.rate}","${t.amountHKD}","${t.account}","${(t.note || '').replace(/"/g, '""')}"\n`;
@@ -849,7 +859,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Stardew_Ledger_${new Date().toISOString().split('T')[0]}.csv`;
+      link.download = `YongSun_Memo_Export_${new Date().toISOString().split('T')[0]}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
