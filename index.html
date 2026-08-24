@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>記帳手帳</title>
+  <title>My Monthly Memo - 記帳手帳</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -22,11 +22,12 @@
           },
           colors: {
             memo: {
-              bg: '#f5f5f4',       // 淺灰紙張底色
+              bg: '#f8fafc',       // 柔和淺灰底色
               card: '#ffffff',     // 純白便條
-              border: '#1c1917',   // 極深灰/黑
-              text: '#1c1917',     // 主文字
-              muted: '#78716c'     // 提示灰字
+              border: '#334155',   // 柔和深灰邊框 (Slate 700)
+              dark: '#1e293b',     // 按鈕與重點深灰 (Slate 800)
+              text: '#1e293b',     // 主文字深灰
+              muted: '#64748b'     // 提示文字灰 (Slate 500)
             }
           }
         }
@@ -35,94 +36,98 @@
   </script>
   <style>
     body {
-      background-color: #f5f5f4;
-      /* 極簡網格筆記本背景 */
+      background-color: #f8fafc;
+      /* 柔和點陣筆記本網格背景 */
       background-image: 
-        linear-gradient(to right, #e5e5e5 1px, transparent 1px),
-        linear-gradient(to bottom, #e5e5e5 1px, transparent 1px);
+        linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+        linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
       background-size: 24px 24px;
-      color: #1c1917;
+      color: #1e293b;
     }
     
-    /* 極簡便條紙卡片風格 (Brutalism) */
+    /* 柔和深灰便條紙卡片風格 */
     .memo-card {
       background: #ffffff;
-      border: 3px solid #1c1917;
-      box-shadow: 6px 6px 0px 0px #1c1917;
+      border: 2.5px solid #334155;
+      box-shadow: 5px 5px 0px 0px #334155;
+      border-radius: 6px;
       transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
     
-    /* 極簡按鈕點擊效果 */
+    /* 柔和深灰按鈕點擊效果 */
     .memo-btn {
       background: #ffffff;
-      border: 3px solid #1c1917;
-      box-shadow: 4px 4px 0px 0px #1c1917;
-      color: #1c1917;
+      border: 2.5px solid #334155;
+      box-shadow: 3px 3px 0px 0px #334155;
+      color: #1e293b;
       font-weight: 800;
+      border-radius: 6px;
       transition: all 0.15s ease;
     }
     .memo-btn:hover {
-      background: #1c1917;
+      background: #334155;
       color: #ffffff;
     }
     .memo-btn:active {
-      transform: translate(4px, 4px);
-      box-shadow: 0px 0px 0px 0px #1c1917;
+      transform: translate(3px, 3px);
+      box-shadow: 0px 0px 0px 0px #334155;
     }
 
-    /* 黑白進度條 */
+    /* 深灰進度條 */
     .memo-bar-bg {
-      background: #e5e5e5;
-      border: 2px solid #1c1917;
-      height: 20px;
+      background: #e2e8f0;
+      border: 2px solid #334155;
+      height: 18px;
+      border-radius: 4px;
+      overflow: hidden;
     }
     .memo-bar-fill {
       height: 100%;
-      background: #1c1917;
+      background: #334155;
       transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    /* 警告狀態：斜紋 */
+    /* 警告狀態：柔和斜紋 */
     .bar-warning {
       background: repeating-linear-gradient(
         45deg,
-        #1c1917,
-        #1c1917 10px,
-        #57534e 10px,
-        #57534e 20px
+        #334155,
+        #334155 10px,
+        #64748b 10px,
+        #64748b 20px
       );
     }
 
-    /* 滾動條極簡化 */
-    .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; border-left: 2px solid #1c1917; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1c1917; }
+    /* 滾動條美化 */
+    .custom-scrollbar::-webkit-scrollbar { width: 7px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; border-left: 2px solid #cbd5e1; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #64748b; border-radius: 4px; }
   </style>
 </head>
-<body class="min-h-screen pb-16 antialiased selection:bg-black selection:text-white">
+<body class="min-h-screen pb-16 antialiased selection:bg-memo-border selection:text-white">
 
   <!-- 頂部導航欄 -->
-  <header class="bg-white border-b-[3px] border-memo-border sticky top-0 z-30 shadow-[0_4px_0_0_#1c1917]">
+  <header class="bg-white border-b-[2.5px] border-memo-border sticky top-0 z-30 shadow-[0_3px_0_0_#334155]">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 bg-white border-[3px] border-memo-border flex items-center justify-center text-memo-text shadow-[2px_2px_0_0_#1c1917]">
-          <i data-lucide="music" class="w-5 h-5 font-black"></i>
+        <div class="w-10 h-10 bg-white border-[2.5px] border-memo-border rounded-md flex items-center justify-center text-memo-text shadow-[2px_2px_0_0_#334155]">
+          <i data-lucide="bookmark" class="w-5 h-5"></i>
         </div>
         <div>
-          <h1 class="font-black text-lg tracking-tight uppercase">YongSun's <span class="bg-black text-white px-1 ml-0.5">Memo</span></h1>
+          <h1 class="font-black text-lg tracking-tight uppercase">My Monthly <span class="bg-memo-dark text-white px-1.5 py-0.5 rounded-sm ml-0.5">Memo</span></h1>
           <div class="flex items-center space-x-1.5 text-xs text-memo-muted font-bold">
-            <span id="sync-indicator" class="w-2.5 h-2.5 bg-white border-2 border-black inline-block"></span>
+            <span id="sync-indicator" class="w-2.5 h-2.5 bg-white border-2 border-memo-border rounded-full inline-block"></span>
             <span id="sync-status">雲端同步中...</span>
           </div>
         </div>
       </div>
 
       <div class="flex items-center space-x-3">
-        <div class="hidden sm:flex items-center space-x-2 text-xs font-black bg-white px-3 py-1.5 border-[2px] border-black shadow-[2px_2px_0_0_#1c1917]">
-          <i data-lucide="plane" class="w-3.5 h-3.5"></i>
+        <div class="hidden sm:flex items-center space-x-2 text-xs font-black bg-white px-3 py-1.5 border-[2px] border-memo-border rounded-md shadow-[2px_2px_0_0_#334155]">
+          <i data-lucide="plane" class="w-3.5 h-3.5 text-memo-muted"></i>
           <span>1K KRW ≈ <strong id="rate-krw-text">5.60 HKD</strong></span>
         </div>
         <button id="btn-open-settings" class="memo-btn px-3 py-1.5 text-xs flex items-center space-x-1.5">
-          <i data-lucide="database" class="w-3.5 h-3.5"></i>
+          <i data-lucide="settings" class="w-3.5 h-3.5"></i>
           <span class="hidden sm:inline">設定 API</span>
         </button>
       </div>
@@ -136,56 +141,56 @@
     <div id="rollover-alert" class="hidden memo-card p-6 bg-white relative overflow-hidden">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
         <div class="flex items-start space-x-4">
-          <div class="w-12 h-12 bg-white text-black border-[3px] border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0_0_#1c1917]">
-            <i data-lucide="heart-handshake" class="w-6 h-6"></i>
+          <div class="w-12 h-12 bg-slate-50 text-memo-dark border-[2.5px] border-memo-border rounded-md flex items-center justify-center shrink-0 shadow-[2px_2px_0_0_#334155]">
+            <i data-lucide="gift" class="w-6 h-6"></i>
           </div>
           <div>
             <h3 class="text-lg font-black uppercase tracking-wide">📝 忍住沒亂買的獎勵！</h3>
-            <p class="text-sm font-bold mt-1 text-memo-muted">上個月的【快樂小廢物】額度竟然省下了 <strong id="rollover-amount" class="text-black text-lg border-b-2 border-black">HK$ 0.00</strong>！</p>
+            <p class="text-sm font-bold mt-1 text-memo-muted">上個月的【快樂小廢物】額度竟然省下了 <strong id="rollover-amount" class="text-memo-dark text-lg border-b-2 border-memo-border">HK$ 0.00</strong>！</p>
           </div>
         </div>
         <div class="flex space-x-3">
           <button id="btn-claim-gacha" class="memo-btn px-4 py-2.5 text-xs">
             👉 及時行樂 (加到本月)！
           </button>
-          <button id="btn-claim-base" class="memo-btn px-4 py-2.5 text-xs bg-black text-white hover:bg-white hover:text-black">
+          <button id="btn-claim-base" class="memo-btn px-4 py-2.5 text-xs bg-memo-dark text-white hover:bg-white hover:text-memo-dark">
             👉 存進演唱會基金！
           </button>
         </div>
       </div>
     </div>
 
-    <!-- 1. 動態資源槽 (容仙本命預算小紙條) -->
+    <!-- 1. 動態資源槽 (預算小紙條) -->
     <div class="memo-card p-6">
-      <h2 class="text-xl font-black mb-1 uppercase tracking-tight flex items-center">
-        <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> 
+      <h2 class="text-lg sm:text-xl font-black mb-1 tracking-tight flex items-center text-memo-dark">
+        <i data-lucide="alert-circle" class="w-5 h-5 mr-2 text-memo-border"></i> 
         🚨 警告：洗多一蚊，見少一次金容仙！
       </h2>
-      <p class="text-sm font-bold text-memo-muted mb-6">（備註：緊急備用金絕對不動，此處僅監控日常與小廢物消耗）</p>
+      <p class="text-xs sm:text-sm font-bold text-memo-muted mb-6">（備註：緊急備用金絕對不動，此處僅監控日常與小廢物消耗）</p>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- 基本與固定開支 -->
         <div>
           <div class="flex justify-between items-end mb-2">
-            <span class="text-sm font-black uppercase">🥪 基本與固定開支 (40%)</span>
+            <span class="text-sm font-black uppercase text-memo-dark">🥪 基本與固定開支 (40%)</span>
             <span id="basic-status-text" class="text-xs font-bold text-memo-muted">載入中...</span>
           </div>
           <div class="memo-bar-bg mb-2">
             <div id="basic-bar" class="memo-bar-fill w-0"></div>
           </div>
-          <div class="text-right text-xs font-black" id="basic-ratio">0 / 7,200 HKD</div>
+          <div class="text-right text-xs font-black text-memo-dark" id="basic-ratio">0 / 7,200 HKD</div>
         </div>
 
         <!-- 快樂小廢物 -->
         <div>
           <div class="flex justify-between items-end mb-2">
-            <span class="text-sm font-black uppercase">✨ 快樂小廢物 (25%)</span>
+            <span class="text-sm font-black uppercase text-memo-dark">✨ 快樂小廢物 (25%)</span>
             <span id="gacha-status-text" class="text-xs font-bold text-memo-muted">載入中...</span>
           </div>
           <div class="memo-bar-bg mb-2">
             <div id="gacha-bar" class="memo-bar-fill w-0"></div>
           </div>
-          <div class="text-right text-xs font-black" id="gacha-ratio">0 / 4,500 HKD</div>
+          <div class="text-right text-xs font-black text-memo-dark" id="gacha-ratio">0 / 4,500 HKD</div>
         </div>
       </div>
     </div>
@@ -194,33 +199,33 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
       <!-- 總花費 -->
       <div class="memo-card p-5">
-        <div class="flex items-center justify-between mb-4">
-          <span class="text-sm font-black uppercase">本月手滑支出</span>
-          <i data-lucide="receipt" class="w-5 h-5"></i>
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-black uppercase text-memo-muted">本月支出</span>
+          <i data-lucide="receipt" class="w-5 h-5 text-memo-muted"></i>
         </div>
-        <div class="text-3xl font-black mb-4 tracking-tighter" id="stat-expense">HK$ 0.00</div>
-        <div class="text-xs font-bold px-3 py-2 bg-white border-[2px] border-black shadow-[2px_2px_0_0_#1c1917] inline-block" id="mom-expense-text">戰報分析中...</div>
+        <div class="text-3xl font-black mb-3 tracking-tighter text-memo-dark" id="stat-expense">HK$ 0.00</div>
+        <div class="text-xs font-bold px-3 py-1.5 bg-slate-50 border-[2px] border-memo-border rounded shadow-[2px_2px_0_0_#334155] inline-block text-memo-dark" id="mom-expense-text">戰報分析中...</div>
       </div>
 
       <!-- 簽售基金 + 備用金 -->
-      <div class="memo-card p-5 bg-gray-100">
-        <div class="flex items-center justify-between mb-4">
-          <span class="text-sm font-black uppercase">💰 簽售/備用金總額</span>
-          <i data-lucide="ticket" class="w-5 h-5"></i>
+      <div class="memo-card p-5 bg-slate-50/70">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-black uppercase text-memo-muted">💰 簽售/備用金總額</span>
+          <i data-lucide="ticket" class="w-5 h-5 text-memo-muted"></i>
         </div>
-        <div class="text-3xl font-black mb-4 tracking-tighter" id="stat-saving">HK$ 0.00</div>
-        <div class="text-xs font-bold px-3 py-2 bg-white border-[2px] border-black shadow-[2px_2px_0_0_#1c1917] inline-block" id="mom-saving-text">戰報分析中...</div>
+        <div class="text-3xl font-black mb-3 tracking-tighter text-memo-dark" id="stat-saving">HK$ 0.00</div>
+        <div class="text-xs font-bold px-3 py-1.5 bg-white border-[2px] border-memo-border rounded shadow-[2px_2px_0_0_#334155] inline-block text-memo-dark" id="mom-saving-text">戰報分析中...</div>
       </div>
 
       <!-- 淨結餘 -->
       <div class="memo-card p-5">
-        <div class="flex items-center justify-between mb-4">
-          <span class="text-sm font-black uppercase">本月淨結餘</span>
-          <i data-lucide="piggy-bank" class="w-5 h-5"></i>
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm font-black uppercase text-memo-muted">本月淨結餘</span>
+          <i data-lucide="piggy-bank" class="w-5 h-5 text-memo-muted"></i>
         </div>
-        <div class="text-3xl font-black mb-4 tracking-tighter" id="stat-balance">HK$ 0.00</div>
+        <div class="text-3xl font-black mb-3 tracking-tighter text-memo-dark" id="stat-balance">HK$ 0.00</div>
         <div class="text-xs font-bold text-memo-muted">
-          打工血汗錢：<span id="stat-income" class="text-black">HK$ 0.00</span>
+          入帳金額：<span id="stat-income" class="text-memo-dark">HK$ 0.00</span>
         </div>
       </div>
     </div>
@@ -231,77 +236,77 @@
       <!-- 左側：記帳表單 (Add Transaction) -->
       <div class="lg:col-span-5 space-y-6">
         <div class="memo-card p-6">
-          <h2 class="text-xl font-black mb-6 uppercase tracking-tight border-b-[3px] border-black pb-3">
-            ✏️ 新增手帳紀錄
+          <h2 class="text-lg font-black mb-6 uppercase tracking-tight border-b-[2.5px] border-memo-border pb-3 text-memo-dark flex items-center gap-2">
+            <i data-lucide="pen-tool" class="w-5 h-5"></i> 新增手帳紀錄
           </h2>
 
           <form id="tx-form" class="space-y-5">
             <div>
-              <label class="block text-sm font-black mb-2 uppercase">類型</label>
-              <div class="grid grid-cols-3 gap-3">
-                <button type="button" data-type="expense" class="type-btn active memo-btn py-3 text-sm">
-                  手滑支出
+              <label class="block text-sm font-black mb-2 uppercase text-memo-dark">類型</label>
+              <div class="grid grid-cols-3 gap-2.5">
+                <button type="button" data-type="expense" class="type-btn active memo-btn py-2.5 text-sm">
+                  💸 支出
                 </button>
-                <button type="button" data-type="income" class="type-btn memo-btn py-3 text-sm bg-gray-100 text-gray-400 border-gray-400 shadow-none hover:bg-gray-200 hover:text-black">
-                  血汗入帳
+                <button type="button" data-type="income" class="type-btn memo-btn py-2.5 text-sm bg-slate-100 text-slate-400 border-slate-300 shadow-none hover:bg-slate-200 hover:text-memo-dark">
+                  💰 入帳
                 </button>
-                <button type="button" data-type="saving" class="type-btn memo-btn py-3 text-sm bg-gray-100 text-gray-400 border-gray-400 shadow-none hover:bg-gray-200 hover:text-black">
-                  存見面金
+                <button type="button" data-type="saving" class="type-btn memo-btn py-2.5 text-sm bg-slate-100 text-slate-400 border-slate-300 shadow-none hover:bg-slate-200 hover:text-memo-dark">
+                  🐷 儲蓄
                 </button>
               </div>
               <input type="hidden" id="tx-type" value="expense">
             </div>
 
             <div>
-              <label class="block text-sm font-black mb-2 uppercase">金額與幣別</label>
-              <div class="flex border-[3px] border-black bg-white shadow-[4px_4px_0_0_#1c1917] focus-within:translate-x-[2px] focus-within:translate-y-[2px] focus-within:shadow-[2px_2px_0_0_#1c1917] transition-all">
-                <select id="tx-currency" class="bg-gray-100 text-black text-sm font-black px-4 py-3 outline-none border-r-[3px] border-black cursor-pointer">
+              <label class="block text-sm font-black mb-2 uppercase text-memo-dark">金額與幣別</label>
+              <div class="flex border-[2.5px] border-memo-border rounded-md bg-white shadow-[3px_3px_0_0_#334155] focus-within:translate-x-[1px] focus-within:translate-y-[1px] focus-within:shadow-[2px_2px_0_0_#334155] transition-all overflow-hidden">
+                <select id="tx-currency" class="bg-slate-100 text-memo-dark text-sm font-black px-3.5 py-3 outline-none border-r-[2.5px] border-memo-border cursor-pointer">
                   <option value="HKD">HKD</option>
                   <option value="KRW">KRW</option>
                   <option value="JPY">JPY</option>
                   <option value="USD">USD</option>
                 </select>
-                <input type="number" step="any" id="tx-amount" placeholder="0.00" required class="flex-1 bg-transparent px-4 py-3 text-lg font-black outline-none placeholder:text-gray-300">
+                <input type="number" step="any" id="tx-amount" placeholder="0.00" required class="flex-1 bg-transparent px-4 py-3 text-lg font-black outline-none placeholder:text-slate-300 text-memo-dark">
               </div>
 
-              <div id="conversion-preview" class="hidden mt-3 px-4 py-3 bg-gray-100 border-[2px] border-black shadow-[2px_2px_0_0_#1c1917] text-xs flex items-center justify-between font-black uppercase">
+              <div id="conversion-preview" class="hidden mt-3 px-4 py-2.5 bg-slate-100 border-[2px] border-memo-border rounded shadow-[2px_2px_0_0_#334155] text-xs flex items-center justify-between font-black uppercase text-memo-dark">
                 <div class="flex items-center space-x-2">
-                  <i data-lucide="arrow-right-left" class="w-4 h-4"></i>
+                  <i data-lucide="arrow-right-left" class="w-4 h-4 text-memo-muted"></i>
                   <span>折合港幣：</span>
                 </div>
-                <span class="text-base" id="preview-hkd-val">HK$ 0.00</span>
+                <span class="text-sm font-black" id="preview-hkd-val">HK$ 0.00</span>
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-5">
+            <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-black mb-2 uppercase">分類</label>
-                <select id="tx-category" class="w-full bg-white border-[3px] border-black px-3 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#1c1917] cursor-pointer">
+                <label class="block text-sm font-black mb-2 uppercase text-memo-dark">分類</label>
+                <select id="tx-category" class="w-full bg-white border-[2.5px] border-memo-border rounded-md px-3 py-2.5 text-sm font-bold outline-none shadow-[3px_3px_0_0_#334155] cursor-pointer text-memo-dark">
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-black mb-2 uppercase">日期</label>
-                <input type="date" id="tx-date" required class="w-full bg-white border-[3px] border-black px-3 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#1c1917]">
+                <label class="block text-sm font-black mb-2 uppercase text-memo-dark">日期</label>
+                <input type="date" id="tx-date" required class="w-full bg-white border-[2.5px] border-memo-border rounded-md px-3 py-2.5 text-sm font-bold outline-none shadow-[3px_3px_0_0_#334155] text-memo-dark">
               </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-5">
+            <div class="grid grid-cols-1 gap-4">
               <div>
-                <label class="block text-sm font-black mb-2 uppercase">支付方式</label>
-                <select id="tx-account" class="w-full bg-white border-[3px] border-black px-3 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#1c1917] cursor-pointer">
-                  <option value="信用卡">信用卡刷下去</option>
-                  <option value="現金">現金鈔票</option>
-                  <option value="銀行轉帳">銀行轉帳/FPS</option>
-                  <option value="八達通/電子錢包">八達通/PayMe</option>
+                <label class="block text-sm font-black mb-2 uppercase text-memo-dark">支付方式</label>
+                <select id="tx-account" class="w-full bg-white border-[2.5px] border-memo-border rounded-md px-3 py-2.5 text-sm font-bold outline-none shadow-[3px_3px_0_0_#334155] cursor-pointer text-memo-dark">
+                  <option value="信用卡">信用卡</option>
+                  <option value="現金">現金</option>
+                  <option value="銀行轉帳">銀行轉帳 / FPS</option>
+                  <option value="八達通/電子錢包">八達通 / PayMe / Alipay</option>
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-black mb-2 uppercase">備註說明</label>
-                <input type="text" id="tx-note" placeholder="例如：買了Solar新專..." class="w-full bg-white border-[3px] border-black px-4 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#1c1917] placeholder:text-gray-400">
+                <label class="block text-sm font-black mb-2 uppercase text-memo-dark">備註說明</label>
+                <input type="text" id="tx-note" placeholder="例如：買了金容仙新專..." class="w-full bg-white border-[2.5px] border-memo-border rounded-md px-4 py-2.5 text-sm font-bold outline-none shadow-[3px_3px_0_0_#334155] placeholder:text-slate-300 text-memo-dark">
               </div>
             </div>
 
-            <button type="submit" id="btn-submit" class="w-full mt-6 memo-btn bg-black text-white text-base py-4 hover:bg-white hover:text-black">
+            <button type="submit" id="btn-submit" class="w-full mt-6 memo-btn bg-memo-dark text-white text-base py-3.5 hover:bg-white hover:text-memo-dark">
               <span id="btn-submit-text" class="flex justify-center items-center gap-2">
                 <i data-lucide="check" class="w-5 h-5"></i> 記低這筆帳！
               </span>
@@ -313,35 +318,35 @@
       <!-- 右側：歷史帳本 (Transaction List) -->
       <div class="lg:col-span-7 space-y-4">
         <div class="memo-card p-6 h-full flex flex-col">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b-[3px] border-black gap-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b-[2.5px] border-memo-border gap-4">
             <div>
-              <h2 class="text-xl font-black uppercase tracking-tight flex items-center space-x-2">
-                <i data-lucide="archive" class="w-6 h-6"></i>
+              <h2 class="text-lg font-black uppercase tracking-tight flex items-center space-x-2 text-memo-dark">
+                <i data-lucide="archive" class="w-5 h-5"></i>
                 <span>歷史手帳紀錄</span>
               </h2>
             </div>
-            <div class="flex items-center space-x-3">
-              <button id="btn-manual-sync" class="memo-btn px-3 py-2 text-xs flex items-center space-x-1.5 shadow-[2px_2px_0_0_#1c1917]">
-                <i data-lucide="refresh-cw" class="w-4 h-4" id="sync-spin-icon"></i>
+            <div class="flex items-center space-x-2.5">
+              <button id="btn-manual-sync" class="memo-btn px-3 py-1.5 text-xs flex items-center space-x-1.5 shadow-[2px_2px_0_0_#334155]">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="sync-spin-icon"></i>
                 <span>刷新</span>
               </button>
-              <button id="btn-export-csv" class="memo-btn px-3 py-2 text-xs flex items-center space-x-1.5 shadow-[2px_2px_0_0_#1c1917]">
-                <i data-lucide="download" class="w-4 h-4"></i>
+              <button id="btn-export-csv" class="memo-btn px-3 py-1.5 text-xs flex items-center space-x-1.5 shadow-[2px_2px_0_0_#334155]">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
                 <span>匯出</span>
               </button>
             </div>
           </div>
 
-          <div class="flex items-center space-x-3 py-5 overflow-x-auto text-xs font-black uppercase">
-            <button data-filter="all" class="filter-btn memo-btn bg-black text-white px-4 py-2 shadow-[2px_2px_0_0_#1c1917]">全部</button>
-            <button data-filter="expense" class="filter-btn memo-btn bg-white text-black px-4 py-2 shadow-[2px_2px_0_0_#1c1917] hover:bg-black hover:text-white">支出</button>
-            <button data-filter="income" class="filter-btn memo-btn bg-white text-black px-4 py-2 shadow-[2px_2px_0_0_#1c1917] hover:bg-black hover:text-white">收入</button>
-            <button data-filter="saving" class="filter-btn memo-btn bg-white text-black px-4 py-2 shadow-[2px_2px_0_0_#1c1917] hover:bg-black hover:text-white">簽售/備用金</button>
+          <div class="flex items-center space-x-2.5 py-4 overflow-x-auto text-xs font-black uppercase">
+            <button data-filter="all" class="filter-btn memo-btn bg-memo-dark text-white px-3.5 py-1.5 shadow-[2px_2px_0_0_#334155]">全部</button>
+            <button data-filter="expense" class="filter-btn memo-btn bg-white text-memo-dark px-3.5 py-1.5 shadow-[2px_2px_0_0_#334155] hover:bg-memo-dark hover:text-white">支出</button>
+            <button data-filter="income" class="filter-btn memo-btn bg-white text-memo-dark px-3.5 py-1.5 shadow-[2px_2px_0_0_#334155] hover:bg-memo-dark hover:text-white">入帳</button>
+            <button data-filter="saving" class="filter-btn memo-btn bg-white text-memo-dark px-3.5 py-1.5 shadow-[2px_2px_0_0_#334155] hover:bg-memo-dark hover:text-white">儲蓄</button>
           </div>
 
-          <div id="tx-list" class="space-y-4 overflow-y-auto max-h-[540px] pr-3 custom-scrollbar flex-1 pb-4">
-            <div class="text-center py-16 space-y-4">
-              <i data-lucide="loader" class="w-10 h-10 mx-auto animate-spin"></i>
+          <div id="tx-list" class="space-y-3.5 overflow-y-auto max-h-[540px] pr-2.5 custom-scrollbar flex-1 pb-2">
+            <div class="text-center py-16 space-y-3 text-memo-muted">
+              <i data-lucide="loader" class="w-8 h-8 mx-auto animate-spin"></i>
               <p class="text-sm font-black uppercase">努力載入雲端紀錄中...</p>
             </div>
           </div>
@@ -352,26 +357,26 @@
   </main>
 
   <!-- 雲端設定彈窗 -->
-  <div id="settings-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="memo-card w-full max-w-md p-8 space-y-6">
-      <div class="flex items-center justify-between border-b-[3px] border-black pb-4">
-        <h3 class="text-xl font-black uppercase flex items-center space-x-2">
-          <i data-lucide="settings" class="w-6 h-6"></i>
+  <div id="settings-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="memo-card w-full max-w-md p-7 space-y-5">
+      <div class="flex items-center justify-between border-b-[2.5px] border-memo-border pb-3">
+        <h3 class="text-lg font-black uppercase flex items-center space-x-2 text-memo-dark">
+          <i data-lucide="settings" class="w-5 h-5"></i>
           <span>雲端 API 設定</span>
         </h3>
-        <button id="btn-close-modal" class="hover:bg-black hover:text-white border-[2px] border-transparent hover:border-black transition-colors p-1">
-          <i data-lucide="x" class="w-6 h-6"></i>
+        <button id="btn-close-modal" class="hover:bg-slate-100 rounded p-1 transition-colors text-memo-dark">
+          <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
-      <p class="text-sm font-bold text-memo-muted">
-        請貼上 Google Apps Script 網址，確保你的心血紀錄萬無一失。
+      <p class="text-sm font-bold text-memo-muted leading-relaxed">
+        請貼上 Google Apps Script 網址，確保你的手帳資料跨裝置即時同步。
       </p>
       <div>
-        <label class="block text-xs font-black uppercase mb-2">API 網址</label>
-        <input type="url" id="api-url-input" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-white border-[3px] border-black px-4 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#1c1917] focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-[2px_2px_0_0_#1c1917] transition-all">
+        <label class="block text-xs font-black uppercase mb-1.5 text-memo-dark">API 網址</label>
+        <input type="url" id="api-url-input" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-white border-[2.5px] border-memo-border rounded-md px-3.5 py-2.5 text-sm font-bold outline-none shadow-[3px_3px_0_0_#334155] focus:translate-x-[1px] focus:translate-y-[1px] focus:shadow-[2px_2px_0_0_#334155] transition-all text-memo-dark">
       </div>
-      <div class="pt-4">
-        <button id="btn-save-api" class="w-full memo-btn bg-black text-white text-base py-3 hover:bg-white hover:text-black">確定連線</button>
+      <div class="pt-2">
+        <button id="btn-save-api" class="w-full memo-btn bg-memo-dark text-white text-sm py-3 hover:bg-white hover:text-memo-dark">確定連線</button>
       </div>
     </div>
   </div>
@@ -384,7 +389,6 @@
     const BUDGET = {
       BASIC: 7200,   // 40% (基本與固定開支)
       WASTE: 4500    // 25% (快樂小廢物)
-      // 簽售 4500 (25%) & 備用金 1800 (10%) 歸類在 Saving，不納入上方消耗進度條
     };
 
     const categories = {
@@ -467,11 +471,11 @@
       const label = document.getElementById('sync-status');
       label.textContent = text;
       if (isSuccess === true) {
-        dot.className = 'w-2.5 h-2.5 bg-black border-2 border-black inline-block';
+        dot.className = 'w-2.5 h-2.5 bg-memo-border border-2 border-memo-border rounded-full inline-block';
       } else if (isSuccess === false) {
-        dot.className = 'w-2.5 h-2.5 bg-white border-2 border-black inline-block cross-pattern';
+        dot.className = 'w-2.5 h-2.5 bg-rose-400 border-2 border-memo-border rounded-full inline-block';
       } else {
-        dot.className = 'w-2.5 h-2.5 bg-gray-400 border-2 border-black animate-pulse inline-block';
+        dot.className = 'w-2.5 h-2.5 bg-amber-300 border-2 border-memo-border rounded-full animate-pulse inline-block';
       }
     }
 
@@ -495,9 +499,9 @@
           const type = e.currentTarget.dataset.type;
           document.getElementById('tx-type').value = type;
           document.querySelectorAll('.type-btn').forEach(b => {
-            b.className = 'type-btn memo-btn py-3 text-sm bg-gray-100 text-gray-400 border-gray-400 shadow-none hover:bg-gray-200 hover:text-black';
+            b.className = 'type-btn memo-btn py-2.5 text-sm bg-slate-100 text-slate-400 border-slate-300 shadow-none hover:bg-slate-200 hover:text-memo-dark';
           });
-          e.currentTarget.className = `type-btn active memo-btn py-3 text-sm`;
+          e.currentTarget.className = `type-btn active memo-btn py-2.5 text-sm`;
           renderCategoryOptions(type);
           updatePreview();
         });
@@ -536,9 +540,9 @@
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           document.querySelectorAll('.filter-btn').forEach(b => {
-            b.className = 'filter-btn memo-btn bg-white text-black px-4 py-2 shadow-[2px_2px_0_0_#1c1917] hover:bg-black hover:text-white';
+            b.className = 'filter-btn memo-btn bg-white text-memo-dark px-3.5 py-1.5 shadow-[2px_2px_0_0_#334155] hover:bg-memo-dark hover:text-white';
           });
-          e.currentTarget.className = 'filter-btn memo-btn bg-black text-white px-4 py-2 shadow-[2px_2px_0_0_#1c1917]';
+          e.currentTarget.className = 'filter-btn memo-btn bg-memo-dark text-white px-3.5 py-1.5 shadow-[2px_2px_0_0_#334155]';
           currentFilter = e.currentTarget.dataset.filter;
           renderList();
         });
@@ -729,17 +733,17 @@
       basicBar.style.width = `${basicPct}%`;
       
       if(basicPct < 60) {
-        basicBar.className = "memo-bar-fill"; // Solid black
+        basicBar.className = "memo-bar-fill";
         basicText.innerHTML = '正常消耗，活下去才能見容仙！';
       } else if (basicPct < 85) {
-        basicBar.className = "memo-bar-fill bar-warning"; // Striped
+        basicBar.className = "memo-bar-fill bar-warning";
         basicText.innerHTML = '伙食費有點高囉？';
       } else {
-        basicBar.className = "memo-bar-fill"; // Solid black
+        basicBar.className = "memo-bar-fill";
         basicText.innerHTML = '<span class="font-black line-through decoration-2">準備去食樹皮！</span>';
       }
 
-      // Waste (Gacha) Bar (含 Rollover Bonus)
+      // Waste Bar
       let currentWasteBudget = BUDGET.WASTE;
       let gachaBonus = parseFloat(localStorage.getItem(`gacha_bonus_${currentMonthStr}`)) || 0;
       currentWasteBudget += gachaBonus;
@@ -754,7 +758,7 @@
         gachaBar.className = "memo-bar-fill";
         gachaText.innerHTML = '錢包很乖，離簽售會又近了一步！';
       } else if (wastePct < 85) {
-        gachaBar.className = "memo-bar-fill bar-warning"; // Striped
+        gachaBar.className = "memo-bar-fill bar-warning";
         gachaText.innerHTML = '喂喂，再買下去就沒錢飛首爾了喔！';
       } else {
         gachaBar.className = "memo-bar-fill";
@@ -779,9 +783,9 @@
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-16 space-y-3">
-            <i data-lucide="file-dashed" class="w-10 h-10 mx-auto text-gray-300"></i>
-            <p class="text-sm font-black uppercase text-gray-400">目前還是空白的，快點記帳吧！</p>
+          <div class="text-center py-16 space-y-2 text-memo-muted">
+            <i data-lucide="file-text" class="w-8 h-8 mx-auto text-slate-300"></i>
+            <p class="text-xs font-black uppercase">目前還是空白的，快點記帳吧！</p>
           </div>
         `;
         lucide.createIcons();
@@ -791,55 +795,54 @@
       let html = '';
       filtered.forEach(item => {
         let sign = '-';
-        let iconName = 'shopping-cart';
+        let iconName = 'shopping-bag';
         
-        // 單色調邏輯：用邊框粗細與背景反差來區分
-        let borderStyle = 'border-2 border-gray-300';
-        let iconBg = 'bg-white text-black';
+        let borderStyle = 'border-[2px] border-slate-200';
+        let iconBg = 'bg-slate-100 text-memo-dark';
 
         if (item.type === 'income') {
           sign = '+';
           iconName = 'wallet';
-          borderStyle = 'border-[3px] border-black shadow-[2px_2px_0_0_#1c1917]';
-          iconBg = 'bg-black text-white';
+          borderStyle = 'border-[2px] border-memo-border shadow-[2px_2px_0_0_#334155]';
+          iconBg = 'bg-memo-dark text-white';
         } else if (item.type === 'saving') {
           sign = '';
-          iconName = 'ticket';
-          borderStyle = 'border-2 border-black border-dashed';
-          iconBg = 'bg-gray-200 text-black';
+          iconName = 'piggy-bank';
+          borderStyle = 'border-[2px] border-memo-border border-dashed';
+          iconBg = 'bg-slate-200 text-memo-dark';
         }
 
         const isForeign = item.currency !== 'HKD';
         const origText = isForeign 
-          ? `<span class="text-xs font-black ml-2 underline decoration-2">(${item.originalAmount.toLocaleString()} ${item.currency})</span>` 
+          ? `<span class="text-xs font-black ml-2 underline decoration-1 text-slate-500">(${item.originalAmount.toLocaleString()} ${item.currency})</span>` 
           : '';
 
         html += `
-          <div class="p-4 bg-white ${borderStyle} hover:bg-gray-50 transition-colors flex items-center justify-between group">
-            <div class="flex items-center space-x-4">
-              <div class="w-10 h-10 ${iconBg} border-[2px] border-black flex items-center justify-center shrink-0">
-                <i data-lucide="${iconName}" class="w-5 h-5"></i>
+          <div class="p-3.5 bg-white ${borderStyle} rounded hover:bg-slate-50 transition-colors flex items-center justify-between group">
+            <div class="flex items-center space-x-3">
+              <div class="w-9 h-9 ${iconBg} border-[1.5px] border-memo-border rounded flex items-center justify-center shrink-0">
+                <i data-lucide="${iconName}" class="w-4 h-4"></i>
               </div>
               <div>
                 <div class="flex items-center space-x-2">
-                  <span class="text-sm font-black">${item.category}</span>
-                  <span class="text-[10px] px-1.5 py-0.5 border-2 border-black font-black uppercase">${item.account}</span>
+                  <span class="text-sm font-black text-memo-dark">${item.category}</span>
+                  <span class="text-[10px] px-1.5 py-0.2 border border-memo-border rounded font-black uppercase text-memo-muted">${item.account}</span>
                 </div>
-                <div class="text-xs text-memo-muted flex items-center space-x-2 mt-1 font-bold">
+                <div class="text-xs text-memo-muted flex items-center space-x-2 mt-0.5 font-bold">
                   <span>${item.date}</span>
-                  ${item.note ? `<span class="text-gray-300">|</span><span class="truncate max-w-[120px] sm:max-w-[200px] text-black">${item.note}</span>` : ''}
+                  ${item.note ? `<span class="text-slate-300">|</span><span class="truncate max-w-[120px] sm:max-w-[200px] text-memo-dark">${item.note}</span>` : ''}
                 </div>
               </div>
             </div>
             <div class="flex items-center space-x-3">
               <div class="text-right">
-                <div class="text-lg font-black">
+                <div class="text-base font-black text-memo-dark">
                   ${sign}HK$ ${item.amountHKD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
                 ${origText}
               </div>
-              <button onclick="deleteTx('${item.id}')" class="opacity-0 group-hover:opacity-100 border-[2px] border-black bg-white p-1.5 hover:bg-black hover:text-white transition-all shadow-[2px_2px_0_0_#1c1917]" title="撕掉紀錄">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              <button onclick="deleteTx('${item.id}')" class="opacity-0 group-hover:opacity-100 border border-memo-border rounded bg-white p-1 hover:bg-memo-dark hover:text-white transition-all shadow-[1px_1px_0_0_#334155]" title="撕掉紀錄">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               </button>
             </div>
           </div>
@@ -859,7 +862,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `YongSun_Memo_Export_${new Date().toISOString().split('T')[0]}.csv`;
+      link.download = `Monthly_Memo_Export_${new Date().toISOString().split('T')[0]}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
