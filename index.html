@@ -164,8 +164,8 @@
             <i data-lucide="heart-handshake" class="w-6 h-6"></i>
           </div>
           <div>
-            <h3 class="text-lg font-black uppercase tracking-wide text-memo-text">📝 忍住沒亂買的獎勵！</h3>
-            <p class="text-sm font-bold mt-1 text-memo-muted">上個月的【快樂小廢物】額度竟然省下了 <strong id="rollover-amount" class="text-memo-text text-lg border-b-2 border-memo-border">HK$ 0.00</strong>！</p>
+            <h3 class="text-lg font-black uppercase tracking-wide text-memo-text">📝 忍手成功嘅獎勵！</h3>
+            <p class="text-sm font-bold mt-1 text-memo-muted">上個月【娛樂與購物】竟然慳返 <strong id="rollover-amount" class="text-memo-text text-lg border-b-2 border-memo-border">HK$ 0.00</strong>！</p>
           </div>
         </div>
         <div class="flex space-x-3">
@@ -173,7 +173,7 @@
             👉 及時行樂 (加到本月)！
           </button>
           <button id="btn-claim-base" class="memo-btn px-4 py-2.5 text-xs bg-memo-border text-white hover:bg-white hover:text-memo-text">
-            👉 存進面聖基金！
+            👉 直接入落追星基金！
           </button>
         </div>
       </div>
@@ -196,7 +196,7 @@
         <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i> 
         🚨 警告：洗多一蚊，見少一次金容仙！
       </h2>
-      <p class="text-sm font-bold text-memo-muted mb-6">（備註：面聖金與保命金絕對不動，此處僅監控日常與小廢物消耗）</p>
+      <p class="text-sm font-bold text-memo-muted mb-6">（備註：飲少杯廢水，買少件垃圾，脂肪少咗，簽售機會多咗，理智消費啊 Ching！）</p>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         <!-- 基本與固定開支 -->
@@ -211,10 +211,10 @@
           <div class="text-right text-xs font-black text-memo-text" id="basic-ratio">0 / 7,200 HKD</div>
         </div>
 
-        <!-- 快樂小廢物 -->
+        <!-- 娛樂與購物 -->
         <div>
           <div class="flex justify-between items-end mb-2">
-            <span class="text-sm font-black uppercase text-memo-text">✨ 快樂小廢物 (25%)</span>
+            <span class="text-sm font-black uppercase text-memo-text">✨ 娛樂與購物 (25%)</span>
             <span id="gacha-status-text" class="text-xs font-bold text-memo-muted">載入中...</span>
           </div>
           <div class="memo-bar-bg mb-2">
@@ -230,17 +230,17 @@
       <!-- 總花費 -->
       <div class="memo-card p-5">
         <div class="flex items-center justify-between mb-4">
-          <span class="text-sm font-black uppercase text-memo-text">本月手滑支出</span>
+          <span class="text-sm font-black uppercase text-memo-text">本月支出</span>
           <i data-lucide="receipt" class="w-5 h-5 text-memo-muted"></i>
         </div>
         <div class="text-3xl font-black mb-4 tracking-tighter text-memo-text" id="stat-expense">HK$ 0.00</div>
         <div class="text-xs font-bold px-3 py-2 bg-white border-[2px] border-memo-border shadow-[2px_2px_0_0_#475569] inline-block text-memo-text" id="mom-expense-text">戰報分析中...</div>
       </div>
 
-      <!-- 面聖/生財/保命 總儲備 -->
+      <!-- 總儲備 -->
       <div class="memo-card p-5 bg-slate-100">
         <div class="flex items-center justify-between mb-4">
-          <span class="text-sm font-black uppercase text-memo-text">💰 面聖與未來總儲備</span>
+          <span class="text-sm font-black uppercase text-memo-text">💰 未來儲備</span>
           <i data-lucide="ticket" class="w-5 h-5 text-memo-muted"></i>
         </div>
         <div class="text-3xl font-black mb-4 tracking-tighter text-memo-text" id="stat-saving">HK$ 0.00</div>
@@ -250,7 +250,7 @@
       <!-- 淨結餘 -->
       <div class="memo-card p-5">
         <div class="flex items-center justify-between mb-4">
-          <span class="text-sm font-black uppercase text-memo-text">本月未分配淨額</span>
+          <span class="text-sm font-black uppercase text-memo-text">本月可用餘額</span>
           <i data-lucide="piggy-bank" class="w-5 h-5 text-memo-muted"></i>
         </div>
         <div class="text-3xl font-black mb-4 tracking-tighter text-memo-text" id="stat-balance">HK$ 0.00</div>
@@ -344,7 +344,7 @@
 
             <button type="submit" class="w-full mt-6 memo-btn bg-memo-border text-white text-base py-4 hover:bg-white hover:text-memo-text">
               <span id="btn-submit-text" class="flex justify-center items-center gap-2">
-                <i data-lucide="check" class="w-5 h-5"></i> 記低這筆帳！
+                <i data-lucide="check" class="w-5 h-5"></i> 幫我入帳！
               </span>
             </button>
           </form>
@@ -414,7 +414,7 @@
         </button>
       </div>
       <p class="text-sm font-bold text-memo-muted">
-        請貼上 Google Apps Script 網址，確保你的心血紀錄萬無一失。
+        請填入 Google Apps Script 網址，確保雲端同步正常。
       </p>
       <div>
         <label class="block text-xs font-black uppercase mb-2 text-memo-text">API 網址</label>
@@ -433,34 +433,50 @@
     // MooMoo 本命預算設定 (月薪 18,000 HKD)
     const BUDGET = {
       BASIC: 7200,   // 40% (基本與固定開支)
-      WASTE: 4500    // 25% (快樂小廢物)
+      WASTE: 4500    // 25% (娛樂與購物)
     };
 
     const categories = {
       expense: [
-        '餐飲', '交通', '房租', '泡泡訂閱', '固定支出 (房租/泡泡訂閱)', // 基本開支
-        '買周邊', '買衣服', '保養護膚' // 快樂小廢物
+        '餐飲', '交通', '房租', 'Fromm訂閱', '固定支出 (房租/Fromm訂閱)', // 基本開支
+        '周邊', '衣服', '保養護膚' // 娛樂與購物
       ],
       income: ['打工/薪水', '股息回報', '其他收入'],
       saving: [
-        '韓國機票', '演唱會門票', '買專抽簽售專用', // 面聖基金
+        '韓國機票', '演唱會門票', '買專抽簽售專用', // 未來儲備
         '定期定額 ETF 投資', // 雪球生財金
         '緊急醫療備用' // 絕對不動保命金
       ]
     };
 
-    const basicCats = ['餐飲', '交通', '房租', '泡泡訂閱', '固定支出 (房租/泡泡訂閱)'];
-    const wasteCats = ['買周邊', '買衣服', '保養護膚'];
+    const basicCats = [ '餐飲', '交通', '房租', 'Fromm訂閱', '固定支出 (房租/Fromm訂閱)'];
+    const wasteCats = ['周邊', '衣服', '保養護膚'];
 
     // 碎碎念語錄庫
     const solarQuotes = [
-      "「木木啊～今天有好好吃飯嗎？🍚✨」",
-      "「呀！忍住不買，我們首爾簽售見好不好！🥺✈️」",
-      "「放下了那杯手搖飲，你離我又更近一步了！🧋❌ ➡️ 🎫⭕」",
-      "「努力存錢的木木最帥氣了！加油加油～💪🐰❤️」",
-      "「又在看購物車了？快去打開 Solarsido 看我唱歌！📺🎶」",
-      "「金容仙正在看著你的錢包...👀💸」"
-    ];
+  // 溫暖關心系
+  "「木木啊～今天有好好吃飯嗎？🍚✨」",
+  "「努力存錢的木木最帥氣了！摸摸頭～💪🐰❤️」",
+  "「比起買小廢物，容仙更想見到健健康康、荷包滿滿嘅你呀！💖」",
+  "「辛苦啦！今天也為了見我而努力忍住物慾了對吧？🥺✈️」",
+  
+  // 斯巴達健身教練系
+  "「肚餓想買宵夜？快啲去飲杯水早啲瞓！聽日見啦～😴💧」",
+  "「與其花錢買零食，不如陪我一齊做 100 下深蹲啦！🏋️‍♀️🔥」",
+  "「放下了那杯手搖飲，你離我又更近一步了！🧋❌ ➡️ 🎫⭕」",
+
+  // 搞笑 / 傲嬌推銷系
+  "「又在看購物車了？快去打開 Solarsido 睇我唱歌！📺🎶」",
+  "「呀！你個購物車做咩又滿咗？快啲清空佢！😡🛒」",
+  "「又想亂洗錢？姐姐唔允許你咁做！🙅‍♀️🐰」",
+  "「金容仙正在看著你的錢包...👀💸」",
+  
+  // 演唱會 / 簽售大餅系
+  "「乖乖儲錢，下次演唱會我哋一定要對視喔！👀✨」",
+  "「洗少一蚊，距離首爾嘅天空又近一寸啦！✈️☁️」",
+  "「忍手唔買嗰陣，記得聽首《BLUES》冷靜下啦～👄🔥」",
+  "「這筆錢存下來，我們簽售會上就能多聊兩句了呢！🗣️💕」"
+];
 
     // 時間工具 (定義在最頂部)
     const today = new Date();
@@ -819,14 +835,14 @@
         const newTx = {
           id: Date.now().toString(),
           type: 'saving',
-          category: '買專抽簽售專用', // 存進面聖基金
+          category: '買專抽簽售專用', // 存進追星基金
           originalAmount: remainingGacha,
           currency: 'HKD',
           rate: 1.0,
           amountHKD: remainingGacha,
           date: new Date().toISOString().split('T')[0],
           account: '銀行轉帳',
-          note: `📝 忍住沒亂買的獎勵！(上月小廢物結餘)`
+          note: `📝 忍手成功嘅獎勵！！(上月娛樂消費結餘)`
         };
         allTransactions.unshift(newTx);
         localStorage.setItem('smartspend_records', JSON.stringify(allTransactions));
@@ -886,22 +902,22 @@
       if (lastExpense === 0) {
          momExpEl.innerHTML = `<span class="text-slate-500">上個月無資料比較</span>`;
       } else if (expenseDiff > 0) {
-        momExpEl.innerHTML = `安堆！比上個月多花了 ${fmt(Math.abs(expenseDiff))}，離容仙遠了一步ㅠㅠ`;
-      } else if (expenseDiff < 0) {
-        momExpEl.innerHTML = `大發！這個月支出比上個月省了 ${fmt(Math.abs(expenseDiff))}，可以多買兩張專了！`;
-      } else {
-        momExpEl.innerHTML = `跟上個月一樣克制，繼續保持！`;
-      }
+  momExpEl.innerHTML = `呀！今個月洗多咗 ${fmt(Math.abs(expenseDiff))}，離容仙又遠咗一步ㅠㅠ`;
+} else if (expenseDiff < 0) {
+  momExpEl.innerHTML = `大發！今個月比上個月慳咗 ${fmt(Math.abs(expenseDiff))}，又可以抽多兩張專！🎉`;
+} else {
+  momExpEl.innerHTML = `同上個月一樣咁生性，繼續保持住！✨`;
+}
 
       const savingDiff = currSaving - lastSaving;
-      const momSavEl = document.getElementById('mom-saving-text');
-      if (lastSaving === 0) {
-         momSavEl.innerHTML = `<span class="text-slate-500">上個月無資料比較</span>`;
-      } else if (savingDiff >= 0) {
-        momSavEl.innerHTML = `面聖基金穩定增長中 (+${fmt(savingDiff)})，衝啊！`;
-      } else {
-        momSavEl.innerHTML = `存錢速度變慢了 (-${fmt(Math.abs(savingDiff))})，要繃緊神經！`;
-      }
+const momSavEl = document.getElementById('mom-saving-text');
+if (lastSaving === 0) {
+   momSavEl.innerHTML = `<span class="text-slate-500">上月無紀錄</span>`;
+} else if (savingDiff >= 0) {
+  momSavEl.innerHTML = `儲錢達標 (+${fmt(savingDiff)})，機票基金越來越穩陣！`;
+} else {
+  momSavEl.innerHTML = `儲得慢咗 (-${fmt(Math.abs(savingDiff))})，下個月要加把勁慳錢！`;
+}
 
       // --- 預算紙條更新 ---
       // Basic Bar
@@ -913,10 +929,10 @@
       
       if(basicPct < 60) {
         basicBar.className = "memo-bar-fill"; // Solid
-        basicText.innerHTML = '正常消耗，活下去才能見容仙！';
+        basicText.innerHTML = '日常食飽飽，先有力見金容仙跑！';
       } else if (basicPct < 85) {
         basicBar.className = "memo-bar-fill bar-warning"; // Striped
-        basicText.innerHTML = '伙食費有點高囉？';
+        basicText.innerHTML = '飯錢超標警告！食樹皮嘅日子近了...🚨';
       } else {
         basicBar.className = "memo-bar-fill"; // Solid
         basicText.innerHTML = '<span class="font-black line-through decoration-2">準備去食樹皮！</span>';
@@ -935,10 +951,10 @@
 
       if(wastePct < 60) {
         gachaBar.className = "memo-bar-fill";
-        gachaText.innerHTML = '錢包很乖，離簽售會又近了一步！';
+        gachaText.innerHTML = '荷包好聽話，距離簽售又行前咗一大步！';
       } else if (wastePct < 85) {
         gachaBar.className = "memo-bar-fill bar-warning"; // Striped
-        gachaText.innerHTML = '喂喂，再買下去就沒錢飛首爾了喔！';
+        gachaText.innerHTML = '金容仙警告你：收手啦！再買落去首爾簽售就冇你份㗎喇！🙅‍♀️🐰';
       } else {
         gachaBar.className = "memo-bar-fill";
         gachaText.innerHTML = '<span class="font-black line-through decoration-2">預算見底！準備食樹皮！</span>';
@@ -966,7 +982,7 @@
         container.innerHTML = `
           <div class="text-center py-16 space-y-4">
             <i data-lucide="file-dashed" class="w-10 h-10 mx-auto text-slate-400"></i>
-            <p class="text-sm font-black uppercase text-slate-500">這個月目前還是空白的，快點記帳吧！</p>
+            <p class="text-sm font-black uppercase text-slate-500">今個月一張單都未有，快啲記低第一筆啦！✍️</p>
           </div>
         `;
         lucide.createIcons();
