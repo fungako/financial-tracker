@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Solar's MooMoo Wallet - 容仙專屬記帳</title>
+  <title>My Monthly Memo - 記帳手帳</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -25,8 +25,6 @@
               emerald: '#10b981', // 容仙發光薄荷綠
               emeraldDark: '#047857',
               gold: '#fbbf24',    // 金黃色點綴
-              card: 'rgba(30, 41, 59, 0.8)', // Slate-800/80
-              border: 'rgba(51, 65, 85, 0.6)' // Slate-700/60
             }
           }
         }
@@ -44,10 +42,10 @@
     
     /* 提亮毛玻璃卡片 */
     .glass-card {
-      background: rgba(30, 41, 59, 0.75);
+      background: rgba(30, 41, 59, 0.8);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(148, 163, 184, 0.15);
+      border: 1px solid rgba(51, 65, 85, 0.6);
       box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
       border-radius: 16px;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -85,8 +83,9 @@
     
     /* 底部語錄貼紙 */
     .quote-sticker {
-      background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(251,191,36,0.1));
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
       border-left: 4px solid #10b981;
+      backdrop-filter: blur(8px);
     }
 
     /* 滾動條 */
@@ -106,7 +105,7 @@
           <i data-lucide="music" class="w-5 h-5"></i>
         </div>
         <div>
-          <h1 class="font-bold text-lg tracking-wide text-white glow-text">Solar's MooMoo Wallet</h1>
+          <h1 class="font-bold text-lg tracking-wide text-white glow-text">Solar's Wallet</h1>
           <div class="flex items-center space-x-1.5 text-xs text-slate-400 font-medium">
             <span id="sync-indicator" class="w-2 h-2 rounded-full bg-amber-400 inline-block shadow-[0_0_5px_currentColor]"></span>
             <span id="sync-status">雲端同步中...</span>
@@ -344,7 +343,7 @@
         </div>
 
         <!-- 💬 容仙底部碎碎念 -->
-        <div class="quote-sticker rounded-xl p-4 flex items-start space-x-3 shadow-sm border border-slate-700/50 bg-slate-800/40">
+        <div class="quote-sticker rounded-xl p-4 flex items-start space-x-3 shadow-sm border border-slate-700/50 bg-slate-800/80">
           <div class="text-xl">🐰</div>
           <div>
             <p class="text-sm font-bold text-slate-200" id="solar-quote">「木木啊～今天有好好吃飯嗎？🍚✨」</p>
@@ -394,19 +393,19 @@
 
     const categories = {
       expense: [
-        '餐飲', '交通', '水電', // 基本開支
-        '買周邊', '買衣服', '保養護膚', '其他小廢物' // 快樂小廢物
+        '餐飲', '交通', '房租', '泡泡訂閱', '固定支出 (房租/泡泡訂閱)', // 基本開支
+        '買周邊', '買衣服', '保養護膚' // 快樂小廢物
       ],
-      income: ['打工/薪水', '股息回報', '其他收入'],
+      income: ['打工/薪水', '其他收入'],
       saving: [
-        '韓國機票', '演唱會門票', '買專抽簽售', // 面聖基金
-        '定期定額 ETF', // 雪球生財金
+        '韓國機票', '演唱會門票', '買專抽簽售專用', // 面聖基金
+        '定期定額 ETF 投資', // 雪球生財金
         '緊急醫療備用' // 絕對不動保命金
       ]
     };
 
-    const basicCats = ['餐飲', '交通', '水電', '固定支出 (房租/泡泡)'];
-    const wasteCats = ['買周邊', '買衣服', '保養護膚', '其他小廢物'];
+    const basicCats = ['餐飲', '交通', '房租', '泡泡訂閱', '固定支出 (房租/泡泡訂閱)'];
+    const wasteCats = ['買周邊', '買衣服', '保養護膚'];
 
     // 碎碎念語錄庫
     const solarQuotes = [
@@ -415,8 +414,7 @@
       "「放下了那杯手搖飲，你離我又更近一步了！🧋❌ ➡️ 🎫⭕」",
       "「努力存錢的木木最帥氣了！加油加油～💪🐰❤️」",
       "「又在看購物車了？快去打開 Solarsido 看我唱歌！📺🎶」",
-      "「金容仙正在看著你的錢包...👀💸」",
-      "「別忘了預留買專的錢喔！嘻嘻🤭」"
+      "「金容仙正在看著你的錢包...👀💸」"
     ];
 
     let allTransactions = JSON.parse(localStorage.getItem('smartspend_records')) || [];
@@ -671,7 +669,7 @@
       let category = document.getElementById('tx-category').value;
       const isFixed = document.getElementById('tx-is-fixed').checked;
       if (type === 'expense' && isFixed) {
-        category = '固定支出 (房租/泡泡)';
+        category = '固定支出 (房租/泡泡訂閱)';
       }
 
       const date = document.getElementById('tx-date').value;
@@ -873,7 +871,7 @@
           ? `<span class="text-[10px] text-slate-500 font-bold ml-1">(${item.originalAmount.toLocaleString()} ${item.currency})</span>` 
           : '';
 
-        // 💔 容仙物價超痛擊換算器 (Albums = 150, Lightstick = 350)
+        // 💔 容仙物價超痛擊換算器 (Albums = 150)
         let painText = '';
         if (item.type === 'expense' && wasteCats.includes(item.category)) {
           const albumsLost = (item.amountHKD / 150).toFixed(1);
