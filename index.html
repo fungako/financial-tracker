@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Monthly Memo</title>
+  <title>YongSun's Memo - 容仙專屬記帳</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -181,7 +181,7 @@
 
     <!-- 1. 動態資源槽 (容仙本命預算小紙條) -->
     <div class="memo-card p-6">
-      <!-- 手機版月份選擇 (備用顯示) -->
+      <!-- 手機版月份選擇 -->
       <div class="sm:hidden mb-4 border-b-[3px] border-black pb-3">
         <div class="flex items-center space-x-2 text-base font-black text-black">
           <i data-lucide="calendar-days" class="w-5 h-5"></i>
@@ -463,30 +463,28 @@
       "「金容仙正在看著你的錢包...👀💸」"
     ];
 
+    // 時間工具 (定義在最頂部，確保全域可用)
+    const today = new Date();
+    const currentMonthStr = today.toISOString().slice(0, 7);
+    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastMonthStr = lastMonthDate.toISOString().slice(0, 7);
+
     let allTransactions = JSON.parse(localStorage.getItem('smartspend_records')) || [];
     let currentFilter = 'all';
     let apiUrl = localStorage.getItem('smartspend_api_url') || '';
-
-    // 月份管理
-    const today = new Date();
-    // 以本機目前時間為基準
-    let selectedMonthStr = today.toISOString().slice(0, 7); // YYYY-MM
-    
-    // 依據選擇的月份篩選出當月的數據
+    let selectedMonthStr = currentMonthStr; // YYYY-MM
     let transactions = []; 
 
     // 初始化月份下拉選單
     function initMonthSelector() {
       const selectors = ['month-selector', 'month-selector-mobile'];
       
-      // 收集所有資料中出現過的月份，並加入當前月份，確保不漏掉
       const monthSet = new Set();
-      monthSet.add(today.toISOString().slice(0, 7));
+      monthSet.add(currentMonthStr);
       allTransactions.forEach(t => {
         if(t.date) monthSet.add(t.date.slice(0, 7));
       });
 
-      // 排序月份 (由新到舊)
       const sortedMonths = Array.from(monthSet).sort((a, b) => b.localeCompare(a));
       
       selectors.forEach(selId => {
@@ -496,14 +494,13 @@
         sortedMonths.forEach(m => {
           const opt = document.createElement('option');
           opt.value = m;
-          opt.textContent = m.replace('-', ' . '); // e.g., 2026 . 08
+          opt.textContent = m.replace('-', ' . ');
           if(m === selectedMonthStr) opt.selected = true;
           selector.appendChild(opt);
         });
 
         selector.addEventListener('change', (e) => {
           selectedMonthStr = e.target.value;
-          // 同步另一個 selector
           const otherSelId = selId === 'month-selector' ? 'month-selector-mobile' : 'month-selector';
           const otherSel = document.getElementById(otherSelId);
           if(otherSel) otherSel.value = selectedMonthStr;
@@ -515,17 +512,14 @@
     }
 
     function filterDataByMonth() {
-      // 抓出當前選定月份的資料
       transactions = allTransactions.filter(t => t.date && t.date.startsWith(selectedMonthStr));
     }
 
-    // 隨機語錄
     function randomizeQuote() {
       const idx = Math.floor(Math.random() * solarQuotes.length);
       document.getElementById('solar-quote').textContent = solarQuotes[idx];
     }
 
-    // 匯率獲取
     async function fetchLiveRates() {
       try {
         const res = await fetch('https://open.er-api.com/v6/latest/HKD');
@@ -544,7 +538,6 @@
       }
     }
 
-    // 雲端同步
     async function syncFromCloud() {
       if (!apiUrl) {
         updateSyncStatus(false, '尚未連線');
@@ -584,13 +577,36 @@
       if (isSuccess === true) {
         dot.className = 'w-2.5 h-2.5 bg-black border-2 border-black inline-block';
       } else if (isSuccess === false) {
-        dot.className = 'w-2.5 h-2.5 bg-white border-2 border-black inline-block cross-pattern';
+        dot.className = 'w-2.5 h-2.5 bg-white border-2 border-black inline-block';
       } else {
         dot.className = 'w-2.5 h-2.5 bg-gray-400 border-2 border-black animate-pulse inline-block';
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      // 優先綁定設定視窗按鈕，防止任何前置邏輯阻礙
+      document.getElementById('btn-save-api').addEventListener('click', () => {
+        const val = document.getElementById('api-url-input').value.trim();
+        if (val) {
+          apiUrl = val;
+          localStorage.setItem('smartspend_api_url', apiUrl);
+          document.getElementById('settings-modal').classList.add('hidden');
+          syncFromCloud();
+        } else {
+          alert('請輸入有效的 Google Apps Script 網址！');
+        }
+      });
+
+      document.getElementById('btn-open-settings').addEventListener('click', () => {
+        document.getElementById('api-url-input').value = apiUrl;
+        document.getElementById('settings-modal').classList.remove('hidden');
+      });
+      
+      document.getElementById('btn-close-modal').addEventListener('click', () => {
+        document.getElementById('settings-modal').classList.add('hidden');
+      });
+
+      // 初始化表單與日誌
       document.getElementById('tx-date').value = new Date().toISOString().split('T')[0];
       renderCategoryOptions('expense');
       lucide.createIcons();
@@ -607,7 +623,7 @@
         renderDashboard();
       }
 
-      // 類型與固定支出 Checkbox 連動
+      // 類型切換 UI
       document.querySelectorAll('.type-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const type = e.currentTarget.dataset.type;
@@ -618,7 +634,6 @@
           });
           e.currentTarget.className = `type-btn active memo-btn py-3 text-sm`;
           
-          // 只有 Expense 顯示固定支出 checkbox
           const fixedContainer = document.getElementById('fixed-expense-container');
           if(type === 'expense') {
             fixedContainer.classList.remove('hidden');
@@ -638,23 +653,9 @@
       document.getElementById('tx-currency').addEventListener('change', updatePreview);
       document.getElementById('tx-form').addEventListener('submit', handleAddTransaction);
 
-      // 設定 Modal
-      document.getElementById('btn-open-settings').addEventListener('click', () => {
-        document.getElementById('api-url-input').value = apiUrl;
-        document.getElementById('settings-modal').classList.remove('hidden');
-      });
-      document.getElementById('btn-close-modal').addEventListener('click', () => {
-        document.getElementById('settings-modal').classList.add('hidden');
-      });
-      document.getElementById('btn-save-api').addEventListener('click', () => {
-        const val = document.getElementById('api-url-input').value.trim();
-        if (val) {
-          apiUrl = val;
-          localStorage.setItem('smartspend_api_url', apiUrl);
-          document.getElementById('settings-modal').classList.add('hidden');
-          syncFromCloud();
-        }
-      });
+      // Rollover Buttons
+      document.getElementById('btn-claim-gacha').addEventListener('click', () => handleRollover('gacha'));
+      document.getElementById('btn-claim-base').addEventListener('click', () => handleRollover('base'));
 
       document.getElementById('btn-manual-sync').addEventListener('click', () => {
         randomizeQuote();
@@ -678,9 +679,7 @@
     function renderCategoryOptions(type) {
       const select = document.getElementById('tx-category');
       select.innerHTML = '';
-      
       let opts = categories[type];
-      
       opts.forEach(cat => {
         const opt = document.createElement('option');
         opt.value = cat;
@@ -734,12 +733,10 @@
       allTransactions.unshift(newTx);
       localStorage.setItem('smartspend_records', JSON.stringify(allTransactions));
       
-      // 若新增的是目前查看的月份，重新篩選
       if(date.startsWith(selectedMonthStr)) {
         filterDataByMonth();
       }
       
-      // 更新下拉選單看有沒有產生新月份
       initMonthSelector();
       renderDashboard();
 
@@ -779,7 +776,6 @@
       }
     };
 
-    // 處理結算按鈕
     async function handleRollover(actionType) {
       const remainingGacha = window.lastMonthGachaRemaining || 0;
       if(remainingGacha <= 0) return;
@@ -795,7 +791,7 @@
         const newTx = {
           id: Date.now().toString(),
           type: 'saving',
-          category: '買專抽簽售專用', // 存進面聖基金
+          category: '買專抽簽售專用',
           originalAmount: remainingGacha,
           currency: 'HKD',
           rate: 1.0,
@@ -821,7 +817,6 @@
       let currExpense = 0, currIncome = 0, currSaving = 0;
       let currBasicSpent = 0, currWasteSpent = 0;
 
-      // 取得上個月的字串，用於 MoM 比較
       const [year, month] = selectedMonthStr.split('-');
       const currDateObj = new Date(year, month - 1, 1);
       currDateObj.setMonth(currDateObj.getMonth() - 1);
@@ -829,7 +824,6 @@
 
       let lastExpense = 0, lastSaving = 0;
 
-      // 計算當前選擇月份
       transactions.forEach(t => {
         if (t.type === 'expense') {
           currExpense += t.amountHKD;
@@ -840,7 +834,6 @@
         if (t.type === 'saving') currSaving += t.amountHKD;
       });
 
-      // 計算比較的上個月
       allTransactions.forEach(t => {
         if(t.date && t.date.startsWith(lastMonthTargetStr)) {
           if(t.type === 'expense') lastExpense += t.amountHKD;
@@ -856,7 +849,7 @@
       document.getElementById('stat-balance').textContent = fmt(netBalance);
       document.getElementById('stat-income').textContent = fmt(currIncome);
 
-      // --- 追星戰報分析 (MoM) ---
+      // MoM 比較
       const expenseDiff = currExpense - lastExpense;
       const momExpEl = document.getElementById('mom-expense-text');
       if (lastExpense === 0) {
@@ -879,8 +872,7 @@
         momSavEl.innerHTML = `存錢速度變慢了 (-${fmt(Math.abs(savingDiff))})，要繃緊神經！`;
       }
 
-      // --- 預算紙條更新 ---
-      // Basic Bar
+      // 進度條
       const basicPct = Math.min(100, (currBasicSpent / BUDGET.BASIC) * 100);
       const basicBar = document.getElementById('basic-bar');
       const basicText = document.getElementById('basic-status-text');
@@ -888,17 +880,16 @@
       basicBar.style.width = `${basicPct}%`;
       
       if(basicPct < 60) {
-        basicBar.className = "memo-bar-fill"; // Solid black
+        basicBar.className = "memo-bar-fill";
         basicText.innerHTML = '正常消耗，活下去才能見容仙！';
       } else if (basicPct < 85) {
-        basicBar.className = "memo-bar-fill bar-warning"; // Striped
+        basicBar.className = "memo-bar-fill bar-warning";
         basicText.innerHTML = '伙食費有點高囉？';
       } else {
-        basicBar.className = "memo-bar-fill"; // Solid black
+        basicBar.className = "memo-bar-fill";
         basicText.innerHTML = '<span class="font-black line-through decoration-2">準備去食樹皮！</span>';
       }
 
-      // Waste (Gacha) Bar (含 Rollover Bonus)
       let currentWasteBudget = BUDGET.WASTE;
       let gachaBonus = parseFloat(localStorage.getItem(`gacha_bonus_${currentMonthStr}`)) || 0;
       currentWasteBudget += gachaBonus;
@@ -913,14 +904,14 @@
         gachaBar.className = "memo-bar-fill";
         gachaText.innerHTML = '錢包很乖，離簽售會又近了一步！';
       } else if (wastePct < 85) {
-        gachaBar.className = "memo-bar-fill bar-warning"; // Striped
+        gachaBar.className = "memo-bar-fill bar-warning";
         gachaText.innerHTML = '喂喂，再買下去就沒錢飛首爾了喔！';
       } else {
         gachaBar.className = "memo-bar-fill";
         gachaText.innerHTML = '<span class="font-black line-through decoration-2">預算見底！準備食樹皮！</span>';
       }
 
-      // --- Rollover 系統檢測 ---
+      // Rollover
       const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthStr}`);
       const lastMonthRemaining = BUDGET.WASTE - lastWasteSpent;
       if (!hasClaimed && lastMonthRemaining > 0 && allTransactions.some(t => t.date.startsWith(lastMonthStr))) {
@@ -951,8 +942,6 @@
       filtered.forEach(item => {
         let sign = '-';
         let iconName = 'shopping-cart';
-        
-        // 單色調邏輯：用邊框粗細與背景反差來區分
         let borderStyle = 'border-2 border-gray-300';
         let iconBg = 'bg-white text-black';
 
@@ -973,7 +962,6 @@
           ? `<span class="text-xs font-black ml-2 underline decoration-2 text-gray-500">(${item.originalAmount.toLocaleString()} ${item.currency})</span>` 
           : '';
 
-        // 💔 容仙物價超痛擊換算器 (Albums = 150)
         let painText = '';
         if (item.type === 'expense' && wasteCats.includes(item.category)) {
           const albumsLost = (item.amountHKD / 150).toFixed(1);
