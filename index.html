@@ -4,11 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Monthly Memo</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Google Fonts: Nunito -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -22,11 +19,11 @@
           },
           colors: {
             memo: {
-              bg: '#f8fafc',       // Slate 50 柔和淺灰底色
-              card: '#ffffff',     // 純白便條
-              border: '#475569',   // Slate 600 柔和深灰邊框
-              text: '#334155',     // Slate 700 主文字深灰
-              muted: '#94a3b8'     // Slate 400 提示文字灰
+              bg: '#f8fafc',
+              card: '#ffffff',
+              border: '#475569',
+              text: '#334155',
+              muted: '#94a3b8'
             }
           }
         }
@@ -36,23 +33,18 @@
   <style>
     body {
       background-color: #f8fafc;
-      /* 柔和點陣筆記本網格背景 */
       background-image: 
         linear-gradient(to right, #e2e8f0 1px, transparent 1px),
         linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
       background-size: 24px 24px;
       color: #334155;
     }
-    
-    /* 柔和深灰便條紙卡片風格 */
     .memo-card {
       background: #ffffff;
       border: 3px solid #475569;
       box-shadow: 6px 6px 0px 0px #475569;
       transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
-    
-    /* 柔和深灰按鈕點擊效果 */
     .memo-btn {
       background: #ffffff;
       border: 3px solid #475569;
@@ -69,8 +61,6 @@
       transform: translate(4px, 4px);
       box-shadow: 0px 0px 0px 0px #475569;
     }
-
-    /* 深灰進度條 */
     .memo-bar-bg {
       background: #f1f5f9;
       border: 2px solid #475569;
@@ -81,7 +71,6 @@
       background: #475569;
       transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    /* 警告狀態：柔和斜紋 */
     .bar-warning {
       background: repeating-linear-gradient(
         45deg,
@@ -91,20 +80,14 @@
         #94a3b8 20px
       );
     }
-
-    /* 自訂選擇器下拉箭頭隱藏 */
     .no-arrow {
       -webkit-appearance: none;
       -moz-appearance: none;
       appearance: none;
     }
-
-    /* Checkbox 深灰風格 */
     input[type="checkbox"] {
       accent-color: #475569;
     }
-
-    /* 滾動條美化 */
     .custom-scrollbar::-webkit-scrollbar { width: 8px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; border-left: 2px solid #94a3b8; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
@@ -129,13 +112,11 @@
       </div>
 
       <div class="flex items-center space-x-3">
-        <!-- 手帳月份切換器 -->
         <div class="hidden sm:flex relative group cursor-pointer border-b-2 border-memo-border pb-0.5">
           <div class="flex items-center space-x-2 text-sm font-black text-memo-text">
             <i data-lucide="calendar-days" class="w-4 h-4"></i>
             <span>Date:</span>
             <select id="month-selector" class="bg-transparent outline-none font-black cursor-pointer no-arrow pr-1 text-memo-text">
-              <!-- JS 動態生成月份 -->
             </select>
             <i data-lucide="chevron-down" class="w-3 h-3"></i>
           </div>
@@ -156,7 +137,7 @@
   <!-- 主內容容器 -->
   <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-8 space-y-8">
 
-    <!-- 🎁 跨月結餘掉落 (Rollover Alert) -->
+    <!-- 跨月結餘掉落 -->
     <div id="rollover-alert" class="hidden memo-card p-6 bg-white relative overflow-hidden">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
         <div class="flex items-start space-x-4">
@@ -179,15 +160,13 @@
       </div>
     </div>
 
-    <!-- 1. 動態資源槽 (容仙本命預算小紙條) -->
+    <!-- 1. 動態資源槽 -->
     <div class="memo-card p-6">
-      <!-- 手機版月份選擇 -->
       <div class="sm:hidden mb-4 border-b-[3px] border-memo-border pb-3">
         <div class="flex items-center space-x-2 text-base font-black text-memo-text">
           <i data-lucide="calendar-days" class="w-5 h-5"></i>
           <span>Date:</span>
           <select id="month-selector-mobile" class="bg-transparent outline-none font-black cursor-pointer flex-1">
-            <!-- JS 動態生成月份 -->
           </select>
         </div>
       </div>
@@ -199,7 +178,6 @@
       <p class="text-sm font-bold text-memo-muted mb-6">（備註：飲少杯廢水，買少件垃圾，脂肪少咗，簽售機會多咗，理智消費啊 Ching！）</p>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <!-- 基本與固定開支 -->
         <div>
           <div class="flex justify-between items-end mb-2">
             <span class="text-sm font-black uppercase text-memo-text">🥪 基本與固定開支 (40%)</span>
@@ -211,7 +189,6 @@
           <div class="text-right text-xs font-black text-memo-text" id="basic-ratio">0 / 7,200 HKD</div>
         </div>
 
-        <!-- 娛樂與購物 -->
         <div>
           <div class="flex justify-between items-end mb-2">
             <span class="text-sm font-black uppercase text-memo-text">✨ 娛樂與購物 (25%)</span>
@@ -225,9 +202,8 @@
       </div>
     </div>
 
-    <!-- 2. 追星戰報分析 (Core Stats Cards) -->
+    <!-- 2. 數據卡片 -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-      <!-- 總花費 -->
       <div class="memo-card p-5">
         <div class="flex items-center justify-between mb-4">
           <span class="text-sm font-black uppercase text-memo-text">💸 本月支出</span>
@@ -237,7 +213,6 @@
         <div class="text-xs font-bold px-3 py-2 bg-white border-[2px] border-memo-border shadow-[2px_2px_0_0_#475569] inline-block text-memo-text" id="mom-expense-text">戰報分析中...</div>
       </div>
 
-      <!-- 總儲備 -->
       <div class="memo-card p-5 bg-slate-100">
         <div class="flex items-center justify-between mb-4">
           <span class="text-sm font-black uppercase text-memo-text">💰 未來儲備</span>
@@ -247,7 +222,6 @@
         <div class="text-xs font-bold px-3 py-2 bg-white border-[2px] border-memo-border shadow-[2px_2px_0_0_#475569] inline-block text-memo-text" id="mom-saving-text">戰報分析中...</div>
       </div>
 
-      <!-- 淨結餘 -->
       <div class="memo-card p-5">
         <div class="flex items-center justify-between mb-4">
           <span class="text-sm font-black uppercase text-memo-text">🥪 本月可用餘額</span>
@@ -260,10 +234,8 @@
       </div>
     </div>
 
-    <!-- 3. 主操作與視覺化區塊 -->
+    <!-- 3. 操作區塊 -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-      <!-- 左側：記帳表單 (Add Transaction) -->
       <div class="lg:col-span-5 space-y-6">
         <div class="memo-card p-6">
           <h2 class="text-xl font-black mb-6 uppercase tracking-tight border-b-[3px] border-memo-border pb-3 text-memo-text">
@@ -290,16 +262,16 @@
             <div>
               <label class="block text-sm font-black mb-2 uppercase text-memo-text">金額與幣別</label>
               <div class="flex border-[3px] border-memo-border bg-white shadow-[4px_4px_0_0_#475569] focus-within:translate-x-[2px] focus-within:translate-y-[2px] focus-within:shadow-[2px_2px_0_0_#475569] transition-all">
-                <select id="tx-currency" class="bg-gray-100 text-black text-sm font-black px-4 py-3 outline-none border-r-[3px] border-memo-border cursor-pointer">
+                <select id="tx-currency" class="bg-slate-100 text-memo-text text-sm font-black px-4 py-3 outline-none border-r-[3px] border-memo-border cursor-pointer">
                   <option value="HKD">HKD</option>
                   <option value="KRW">KRW</option>
                   <option value="JPY">JPY</option>
                   <option value="USD">USD</option>
                 </select>
-                <input type="number" step="any" id="tx-amount" placeholder="0.00" required class="flex-1 bg-transparent px-4 py-3 text-lg font-black outline-none placeholder:text-gray-400 text-memo-text">
+                <input type="number" step="any" id="tx-amount" placeholder="0.00" required class="flex-1 bg-transparent px-4 py-3 text-lg font-black outline-none placeholder:text-slate-400 text-memo-text">
               </div>
 
-              <div id="conversion-preview" class="hidden mt-3 px-4 py-3 bg-gray-100 border-[2px] border-memo-border shadow-[2px_2px_0_0_#475569] text-xs flex items-center justify-between font-black uppercase text-memo-text">
+              <div id="conversion-preview" class="hidden mt-3 px-4 py-3 bg-slate-100 border-[2px] border-memo-border shadow-[2px_2px_0_0_#475569] text-xs flex items-center justify-between font-black uppercase text-memo-text">
                 <div class="flex items-center space-x-2">
                   <i data-lucide="arrow-right-left" class="w-4 h-4 text-memo-muted"></i>
                   <span>折合港幣：</span>
@@ -308,10 +280,9 @@
               </div>
             </div>
 
-            <!-- 動態新增：是否為固定支出 -->
-            <div id="fixed-expense-container" class="flex items-center space-x-2 bg-gray-100 p-3 border-[2px] border-memo-border shadow-[2px_2px_0_0_#475569]">
+            <div id="fixed-expense-container" class="flex items-center space-x-2 bg-slate-100 p-3 border-[2px] border-memo-border shadow-[2px_2px_0_0_#475569]">
               <input type="checkbox" id="tx-is-fixed" class="w-4 h-4 border-2 border-memo-border cursor-pointer">
-              <label for="tx-is-fixed" class="text-sm font-black cursor-pointer select-none text-memo-text">這是每月固定支出 (如房租/Fromm訂閱)</label>
+              <label for="tx-is-fixed" class="text-sm font-black cursor-pointer select-none text-memo-text">每月固定支出 (如房租/Fromm訂閱)</label>
             </div>
 
             <div class="grid grid-cols-2 gap-5">
@@ -338,7 +309,7 @@
               </div>
               <div>
                 <label class="block text-sm font-black mb-2 uppercase text-memo-text">備註說明</label>
-                <input type="text" id="tx-note" placeholder="例如：買了金容仙新專..." class="w-full bg-white border-[3px] border-memo-border px-4 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#475569] placeholder:text-gray-400 text-memo-text">
+                <input type="text" id="tx-note" placeholder="例如：買了金容仙新專..." class="w-full bg-white border-[3px] border-memo-border px-4 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#475569] placeholder:text-slate-400 text-memo-text">
               </div>
             </div>
 
@@ -351,7 +322,6 @@
         </div>
       </div>
 
-      <!-- 右側：歷史帳本 (Transaction List) -->
       <div class="lg:col-span-7 space-y-6 flex flex-col">
         <div class="memo-card p-6 flex-1 flex flex-col">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b-[3px] border-memo-border gap-4">
@@ -388,7 +358,6 @@
           </div>
         </div>
 
-        <!-- 💬 容仙底部碎碎念 -->
         <div class="memo-card p-4 flex items-start space-x-3 border-dashed">
           <div class="text-2xl">🐰</div>
           <div>
@@ -397,7 +366,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </main>
 
@@ -427,32 +395,29 @@
   </div>
 
   <script>
-    // 匯率狀態
     let exchangeRates = { HKD: 1.0, KRW: 0.0056, JPY: 0.051, USD: 7.82 };
     
-    // MooMoo 本命預算設定 (月薪 18,000 HKD)
     const BUDGET = {
-      BASIC: 7200,   // 40% (基本與固定開支)
-      WASTE: 4500    // 25% (娛樂與購物)
+      BASIC: 7200,
+      WASTE: 4500
     };
 
     const categories = {
       expense: [
-        '餐飲', '交通', '房租', 'Fromm訂閱', '固定支出 (房租/Fromm訂閱)', // 基本開支
-        '周邊', '衣服', '保養護膚' // 娛樂與購物
+        '餐飲', '交通', '房租', 'Fromm訂閱', '固定支出 (房租/Fromm訂閱)',
+        '周邊', '衣服', '保養護膚'
       ],
       income: ['打工/薪水', '股息回報', '其他收入'],
       saving: [
-        '韓國機票', '演唱會門票', '買專抽簽售專用', // 未來儲備
-        '定期定額 ETF 投資', // 雪球生財金
-        '緊急醫療備用' // 絕對不動保命金
+        '韓國機票', '演唱會門票', '買專抽簽售專用',
+        '定期定額 ETF 投資',
+        '緊急醫療備用'
       ]
     };
 
     const basicCats = [ '餐飲', '交通', '房租', 'Fromm訂閱', '固定支出 (房租/Fromm訂閱)'];
     const wasteCats = ['周邊', '衣服', '保養護膚'];
 
-    // 碎碎念語錄庫
     const solarQuotes = [
       "「木木啊～今天有好好吃飯嗎？🍚✨」",
       "「努力存錢的木木最帥氣了！摸摸頭～💪🐰❤️」",
@@ -471,34 +436,39 @@
       "「這筆錢存下來，我們簽售會上就能多聊兩句了呢！🗣️💕」"
     ];
 
-    // 時間工具 (定義在最頂部)
     const today = new Date();
     const currentMonthStr = today.toISOString().slice(0, 7);
-    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-    const lastMonthStr = lastMonthDate.toISOString().slice(0, 7);
 
-    // 確保 localStorage 不會因為異常的資料格式崩潰
     let allTransactions = [];
     try {
       allTransactions = JSON.parse(localStorage.getItem('smartspend_records')) || [];
     } catch(e) {
-      console.warn("Storage parsed failed, reset.");
       allTransactions = [];
     }
 
     let currentFilter = 'all';
     let apiUrl = localStorage.getItem('smartspend_api_url') || '';
-    let selectedMonthStr = currentMonthStr; // YYYY-MM
+    let selectedMonthStr = currentMonthStr; 
     let transactions = []; 
 
-    // 初始化月份下拉選單
+    function getLastMonthString(currentStr) {
+      if (!currentStr || !currentStr.includes('-')) return '';
+      const parts = currentStr.split('-');
+      let y = parseInt(parts[0], 10);
+      let m = parseInt(parts[1], 10) - 1;
+      if (m === 0) {
+        m = 12;
+        y -= 1;
+      }
+      return `${y}-${String(m).padStart(2, '0')}`;
+    }
+
     function initMonthSelector() {
       const selectors = ['month-selector', 'month-selector-mobile'];
-      
       const monthSet = new Set();
       monthSet.add(currentMonthStr);
       allTransactions.forEach(t => {
-        if(t.date) monthSet.add(t.date.slice(0, 7));
+        if(t && t.date) monthSet.add(t.date.slice(0, 7));
       });
 
       const sortedMonths = Array.from(monthSet).sort((a, b) => b.localeCompare(a));
@@ -507,34 +477,29 @@
         const selector = document.getElementById(selId);
         if(!selector) return;
         
-        // 替換節點以清除舊的事件監聽器，防止重複綁定
-        const newSelector = selector.cloneNode(true);
-        selector.parentNode.replaceChild(newSelector, selector);
-        
-        newSelector.innerHTML = '';
+        selector.innerHTML = '';
         sortedMonths.forEach(m => {
           const opt = document.createElement('option');
           opt.value = m;
           opt.textContent = m.replace('-', ' . ');
           if(m === selectedMonthStr) opt.selected = true;
-          newSelector.appendChild(opt);
+          selector.appendChild(opt);
         });
 
-        newSelector.addEventListener('change', (e) => {
+        selector.onchange = (e) => {
           selectedMonthStr = e.target.value;
-          
           const otherSelId = selId === 'month-selector' ? 'month-selector-mobile' : 'month-selector';
           const otherSel = document.getElementById(otherSelId);
           if(otherSel) otherSel.value = selectedMonthStr;
           
           filterDataByMonth();
           renderDashboard();
-        });
+        };
       });
     }
 
     function filterDataByMonth() {
-      transactions = allTransactions.filter(t => t.date && t.date.startsWith(selectedMonthStr));
+      transactions = allTransactions.filter(t => t && t.date && t.date.startsWith(selectedMonthStr));
     }
 
     function randomizeQuote() {
@@ -576,14 +541,28 @@
       try {
         const res = await fetch(apiUrl);
         if (res.ok) {
-          const data = await res.json();
-          allTransactions = Array.isArray(data) ? data : [];
-          localStorage.setItem('smartspend_records', JSON.stringify(allTransactions));
-          updateSyncStatus(true, '同步成功');
+          const text = await res.text();
+          let data;
+          try {
+            data = JSON.parse(text);
+          } catch(e) {
+            throw new Error('Google 回傳了非 JSON 格式（通常是權限或錯誤頁面）');
+          }
+          
+          if (Array.isArray(data)) {
+            allTransactions = data;
+            localStorage.setItem('smartspend_records', JSON.stringify(allTransactions));
+            updateSyncStatus(true, '同步成功');
+          } else if (data && data.error) {
+            throw new Error(data.error);
+          } else {
+            throw new Error('資料格式不正確');
+          }
         } else {
-          throw new Error('讀取失敗');
+          throw new Error('連線失敗 (' + res.status + ')');
         }
       } catch (err) {
+        console.error('Sync failed:', err);
         updateSyncStatus(false, '同步失敗');
       } finally {
         if (spinIcon) spinIcon.classList.remove('animate-spin');
@@ -608,7 +587,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      // **重要修復：優先綁定 API 儲存按鈕，完全避開後方任何報錯阻擋**
       const btnSaveApi = document.getElementById('btn-save-api');
       if (btnSaveApi) {
         btnSaveApi.addEventListener('click', () => {
@@ -639,7 +617,6 @@
         });
       }
 
-      // 初始化表單
       const dateInput = document.getElementById('tx-date');
       if(dateInput) dateInput.value = new Date().toISOString().split('T')[0];
 
@@ -650,7 +627,6 @@
       initMonthSelector();
       filterDataByMonth();
 
-      // 檢查是否已設定 API
       if (apiUrl) {
         document.getElementById('api-url-input').value = apiUrl;
         syncFromCloud();
@@ -659,7 +635,6 @@
         renderDashboard();
       }
 
-      // 類型與固定支出 Checkbox 連動
       document.querySelectorAll('.type-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const type = e.currentTarget.dataset.type;
@@ -670,7 +645,6 @@
           });
           e.currentTarget.className = `type-btn active memo-btn py-3 text-sm`;
           
-          // 只有 Expense 顯示固定支出 checkbox
           const fixedContainer = document.getElementById('fixed-expense-container');
           if(type === 'expense') {
             fixedContainer.classList.remove('hidden');
@@ -694,7 +668,6 @@
       const txForm = document.getElementById('tx-form');
       if(txForm) txForm.addEventListener('submit', handleAddTransaction);
 
-      // Rollover Buttons
       const btnGacha = document.getElementById('btn-claim-gacha');
       if(btnGacha) btnGacha.addEventListener('click', () => handleRollover('gacha'));
       const btnBase = document.getElementById('btn-claim-base');
@@ -710,7 +683,6 @@
       const btnExp = document.getElementById('btn-export-csv');
       if(btnExp) btnExp.addEventListener('click', exportToCSV);
 
-      // Filter Buttons
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           document.querySelectorAll('.filter-btn').forEach(b => {
@@ -788,12 +760,10 @@
       allTransactions.unshift(newTx);
       localStorage.setItem('smartspend_records', JSON.stringify(allTransactions));
       
-      // 若新增的是目前查看的月份，重新篩選
       if(date.startsWith(selectedMonthStr)) {
         filterDataByMonth();
       }
       
-      // 更新下拉選單看有沒有產生新月份
       initMonthSelector();
       renderDashboard();
 
@@ -835,21 +805,22 @@
     };
 
     async function handleRollover(actionType) {
+      const lastMonthTargetStr = getLastMonthString(selectedMonthStr);
       const remainingGacha = window.lastMonthGachaRemaining || 0;
       if(remainingGacha <= 0) return;
 
-      localStorage.setItem(`rollover_claimed_${lastMonthStr}`, 'true');
+      localStorage.setItem(`rollover_claimed_${lastMonthTargetStr}`, 'true');
       
       if(actionType === 'gacha') {
-        let existingBonus = parseFloat(localStorage.getItem(`gacha_bonus_${currentMonthStr}`)) || 0;
-        localStorage.setItem(`gacha_bonus_${currentMonthStr}`, existingBonus + remainingGacha);
+        let existingBonus = parseFloat(localStorage.getItem(`gacha_bonus_${selectedMonthStr}`)) || 0;
+        localStorage.setItem(`gacha_bonus_${selectedMonthStr}`, existingBonus + remainingGacha);
         document.getElementById('rollover-alert').classList.add('hidden');
         renderDashboard();
       } else if (actionType === 'base') {
         const newTx = {
           id: Date.now().toString(),
           type: 'saving',
-          category: '買專抽簽售專用', // 存進面聖基金
+          category: '買專抽簽售專用',
           originalAmount: remainingGacha,
           currency: 'HKD',
           rate: 1.0,
@@ -874,17 +845,12 @@
     function renderDashboard() {
       let currExpense = 0, currIncome = 0, currSaving = 0;
       let currBasicSpent = 0, currWasteSpent = 0;
-
-      // 取得上個月的字串，用於 MoM 比較
-      const [year, month] = selectedMonthStr.split('-');
-      const currDateObj = new Date(year, month - 1, 1);
-      currDateObj.setMonth(currDateObj.getMonth() - 1);
-      const lastMonthTargetStr = currDateObj.toISOString().slice(0, 7);
-
       let lastExpense = 0, lastSaving = 0;
 
-      // 計算當前選擇月份
+      const lastMonthTargetStr = getLastMonthString(selectedMonthStr);
+
       transactions.forEach(t => {
+        if (!t) return;
         if (t.type === 'expense') {
           currExpense += t.amountHKD;
           if(basicCats.includes(t.category)) currBasicSpent += t.amountHKD;
@@ -894,9 +860,8 @@
         if (t.type === 'saving') currSaving += t.amountHKD;
       });
 
-      // 計算比較的上個月
       allTransactions.forEach(t => {
-        if(t.date && t.date.startsWith(lastMonthTargetStr)) {
+        if(t && t.date && t.date.startsWith(lastMonthTargetStr)) {
           if(t.type === 'expense') lastExpense += t.amountHKD;
           if(t.type === 'saving') lastSaving += t.amountHKD;
         }
@@ -915,10 +880,9 @@
       if(statBal) statBal.textContent = fmt(netBalance);
       if(statInc) statInc.textContent = fmt(currIncome);
 
-      // --- 追星戰報分析 (MoM) ---
       const expenseDiff = currExpense - lastExpense;
       const momExpEl = document.getElementById('mom-expense-text');
-      if(momExpEl) {
+      if (momExpEl) {
         if (lastExpense === 0) {
            momExpEl.innerHTML = `<span class="text-slate-500">上個月無資料比較</span>`;
         } else if (expenseDiff > 0) {
@@ -932,7 +896,7 @@
 
       const savingDiff = currSaving - lastSaving;
       const momSavEl = document.getElementById('mom-saving-text');
-      if(momSavEl) {
+      if (momSavEl) {
         if (lastSaving === 0) {
            momSavEl.innerHTML = `<span class="text-slate-500">上月無紀錄</span>`;
         } else if (savingDiff >= 0) {
@@ -942,8 +906,6 @@
         }
       }
 
-      // --- 預算紙條更新 ---
-      // Basic Bar
       const basicPct = Math.min(100, (currBasicSpent / BUDGET.BASIC) * 100);
       const basicBar = document.getElementById('basic-bar');
       const basicText = document.getElementById('basic-status-text');
@@ -953,20 +915,19 @@
       
       if(basicBar && basicText) {
         if(basicPct < 60) {
-          basicBar.className = "memo-bar-fill"; // Solid
+          basicBar.className = "memo-bar-fill";
           basicText.innerHTML = '日常食飽飽，先有力見金容仙跑！';
         } else if (basicPct < 85) {
-          basicBar.className = "memo-bar-fill bar-warning"; // Striped
+          basicBar.className = "memo-bar-fill bar-warning";
           basicText.innerHTML = '飯錢超標警告！食樹皮嘅日子近了...🚨';
         } else {
-          basicBar.className = "memo-bar-fill"; // Solid
+          basicBar.className = "memo-bar-fill";
           basicText.innerHTML = '<span class="font-black line-through decoration-2">準備去食樹皮！</span>';
         }
       }
 
-      // Waste Bar
       let currentWasteBudget = BUDGET.WASTE;
-      let gachaBonus = parseFloat(localStorage.getItem(`gacha_bonus_${currentMonthStr}`)) || 0;
+      let gachaBonus = parseFloat(localStorage.getItem(`gacha_bonus_${selectedMonthStr}`)) || 0;
       currentWasteBudget += gachaBonus;
 
       const wastePct = Math.min(100, (currWasteSpent / currentWasteBudget) * 100);
@@ -981,7 +942,7 @@
           gachaBar.className = "memo-bar-fill";
           gachaText.innerHTML = '荷包好聽話，距離簽售又行前咗一大步！';
         } else if (wastePct < 85) {
-          gachaBar.className = "memo-bar-fill bar-warning"; // Striped
+          gachaBar.className = "memo-bar-fill bar-warning";
           gachaText.innerHTML = '金容仙警告你：收手啦！再買落去首爾簽售就冇你份㗎喇！🙅‍♀️🐰';
         } else {
           gachaBar.className = "memo-bar-fill";
@@ -989,12 +950,11 @@
         }
       }
 
-      // --- Rollover 系統檢測 ---
-      const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthStr}`);
+      const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthTargetStr}`);
       const lastMonthRemaining = BUDGET.WASTE - lastWasteSpent;
       const roAlert = document.getElementById('rollover-alert');
       if (roAlert) {
-        if (!hasClaimed && lastMonthRemaining > 0 && allTransactions.some(t => t.date && t.date.startsWith(lastMonthStr))) {
+        if (!hasClaimed && lastMonthRemaining > 0 && allTransactions.some(t => t && t.date && t.date.startsWith(lastMonthTargetStr))) {
           window.lastMonthGachaRemaining = lastMonthRemaining;
           const roAmt = document.getElementById('rollover-amount');
           if(roAmt) roAmt.textContent = `HK$ ${lastMonthRemaining.toLocaleString()}`;
@@ -1048,7 +1008,6 @@
           ? `<span class="text-[10px] font-black ml-2 underline decoration-2 text-slate-500">(${item.originalAmount.toLocaleString()} ${item.currency})</span>` 
           : '';
 
-        // 💔 容仙物價超痛擊換算器 (Albums = 150)
         let painText = '';
         if (item.type === 'expense' && wasteCats.includes(item.category)) {
           const albumsLost = (item.amountHKD / 150).toFixed(1);
@@ -1056,7 +1015,7 @@
         }
 
         html += `
-          <div class="p-4 bg-white ${borderStyle} hover:bg-gray-50 transition-colors flex items-center justify-between group">
+          <div class="p-4 bg-white ${borderStyle} hover:bg-slate-50 transition-colors flex items-center justify-between group">
             <div class="flex items-center space-x-4">
               <div class="w-10 h-10 ${iconBg} border-[2px] border-black flex items-center justify-center shrink-0">
                 <i data-lucide="${iconName}" class="w-5 h-5"></i>
@@ -1091,7 +1050,6 @@
       lucide.createIcons();
     }
 
-    // 💡 已修復的匯出 CSV 語法錯誤 (嚴格單行 \n)
     function exportToCSV() {
       if (allTransactions.length === 0) return alert('目前沒有紀錄可以匯出！');
       
