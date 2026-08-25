@@ -439,14 +439,16 @@
     const today = new Date();
     const currentMonthStr = today.toISOString().slice(0, 7);
 
-    let allTransactions = [];
+   let allTransactions = [];
     try {
-      allTransactions = JSON.parse(localStorage.getItem('smartspend_records')) || [];
+      let stored = JSON.parse(localStorage.getItem('smartspend_records'));
+      allTransactions = Array.isArray(stored) ? stored : [];
     } catch(e) {
       allTransactions = [];
+      localStorage.removeItem('smartspend_records'); // 清除壞資料
     }
-
     let currentFilter = 'all';
+    
     let apiUrl = localStorage.getItem('smartspend_api_url') || '';
     let selectedMonthStr = currentMonthStr; 
     let transactions = []; 
@@ -465,10 +467,11 @@
 
     function initMonthSelector() {
       const selectors = ['month-selector', 'month-selector-mobile'];
-      const monthSet = new Set();
+  const monthSet = new Set();
       monthSet.add(currentMonthStr);
       allTransactions.forEach(t => {
-        if(t && t.date) monthSet.add(t.date.slice(0, 7));
+        // 加入型別檢查，避免 Google Sheets 傳回數字或空值導致 slice 崩潰
+        if(t && typeof t.date === 'string') monthSet.add(t.date.slice(0, 7));
       });
 
       const sortedMonths = Array.from(monthSet).sort((a, b) => b.localeCompare(a));
@@ -498,8 +501,8 @@
       });
     }
 
-    function filterDataByMonth() {
-      transactions = allTransactions.filter(t => t && t.date && t.date.startsWith(selectedMonthStr));
+ function filterDataByMonth() {
+      transactions = allTransactions.filter(t => t && typeof t.date === 'string' && t.date.startsWith(selectedMonthStr));
     }
 
     function randomizeQuote() {
@@ -863,8 +866,9 @@
         if (t.type === 'saving') currSaving += t.amountHKD;
       });
 
+  // 計算比較的上個月
       allTransactions.forEach(t => {
-        if(t && t.date && t.date.startsWith(lastMonthTargetStr)) {
+        if(t && typeof t.date === 'string' && t.date.startsWith(lastMonthTargetStr)) {
           if(t.type === 'expense') lastExpense += t.amountHKD;
           if(t.type === 'saving') lastSaving += t.amountHKD;
         }
