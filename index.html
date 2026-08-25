@@ -334,6 +334,10 @@
               </h2>
             </div>
             <div class="flex items-center space-x-3">
+              <button onclick="generateBattleReport()" class="memo-btn px-3 py-2 text-xs flex items-center space-x-1.5 shadow-[2px_2px_0_0_#475569] bg-memo-border text-white hover:bg-white hover:text-memo-text">
+                <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+                <span>本月戰報</span>
+              </button>
               <button id="btn-manual-sync" class="memo-btn px-3 py-2 text-xs flex items-center space-x-1.5 shadow-[2px_2px_0_0_#475569]">
                 <i data-lucide="refresh-cw" class="w-4 h-4" id="sync-spin-icon"></i>
                 <span>刷新</span>
@@ -371,6 +375,47 @@
     </div>
   </main>
 
+  <!-- 📊 追星戰報彈窗 -->
+  <div id="report-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="memo-card w-full max-w-md p-6 space-y-6 border-[3px] border-memo-border shadow-[8px_8px_0_0_#475569]">
+      <div class="flex items-center justify-between border-b-[3px] border-memo-border pb-4">
+        <h3 class="text-xl font-black uppercase flex items-center space-x-2 text-memo-text">
+          <i data-lucide="bar-chart-2" class="w-6 h-6"></i>
+          <span>📊 本月戰報與成就</span>
+        </h3>
+        <button onclick="document.getElementById('report-modal').classList.add('hidden')" class="hover:bg-slate-100 rounded p-1 transition-colors text-memo-text">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+      
+      <div class="space-y-6">
+        <!-- 追星基金進度條 -->
+        <div>
+          <div class="flex justify-between items-end mb-2">
+            <span class="text-sm font-black uppercase text-memo-text">✈️ 追星基金達標率 (20%)</span>
+            <span id="report-pct-text" class="text-xs font-bold text-memo-text bg-slate-100 px-2 py-1 border-2 border-memo-border shadow-[2px_2px_0_0_#475569]">0%</span>
+          </div>
+          <div class="memo-bar-bg mb-2 h-4">
+            <div id="report-bar" class="memo-bar-fill w-0 bg-memo-border"></div>
+          </div>
+          <p id="report-fund-detail" class="text-xs font-bold text-memo-muted">累積: HK$ 0 / 目標: HK$ 3,600</p>
+        </div>
+
+        <!-- 容仙物價局 -->
+        <div class="bg-slate-100 p-4 border-[2px] border-memo-border shadow-[2px_2px_0_0_#475569]">
+          <h4 class="text-xs font-black uppercase text-memo-text mb-2 flex items-center gap-1"><i data-lucide="shopping-bag" class="w-4 h-4"></i> 容仙物價局分析</h4>
+          <p id="report-index-text" class="text-sm font-bold text-memo-text">分析中...</p>
+        </div>
+
+        <!-- 專屬結語 -->
+        <div class="flex items-start space-x-3 border-t-[3px] border-memo-border border-dashed pt-4">
+          <div class="text-3xl">🐰</div>
+          <p id="report-quote" class="text-sm font-black text-memo-text mt-1">...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <!-- 雲端設定彈窗 -->
   <div id="settings-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="memo-card w-full max-w-md p-8 space-y-6">
@@ -1083,6 +1128,59 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    }
+
+    function generateBattleReport() {
+      let currBasicSpent = 0, currWasteSpent = 0, currSaving = 0;
+      
+      // 計算本月花費
+      transactions.forEach(t => {
+        if (!t) return;
+        const amt = Number(t.amountHKD) || 0;
+        if (t.type === 'expense') {
+          if (basicCats.includes(t.category)) currBasicSpent += amt;
+          if (wasteCats.includes(t.category)) currWasteSpent += amt;
+        }
+        if (t.type === 'saving') currSaving += amt;
+      });
+
+      // 計算結餘 (預算 - 支出)
+      const basicBalance = BUDGET.BASIC - currBasicSpent;
+      const wasteBalance = BUDGET.WASTE - currWasteSpent;
+      
+      // 總儲蓄 = 主動儲蓄 + 被動結餘
+      const totalSaved = currSaving + basicBalance + wasteBalance;
+      const target = 3600;
+      const pct = (totalSaved / target) * 100;
+      
+      // 1. 更新進度條
+      document.getElementById('report-pct-text').textContent = `${Math.max(0, pct).toFixed(1)}%`;
+      document.getElementById('report-bar').style.width = `${Math.min(100, Math.max(0, pct))}%`;
+      document.getElementById('report-fund-detail').textContent = `累積: HK$ ${totalSaved.toLocaleString('en-US', {minimumFractionDigits: 2})} / 目標: HK$ 3,600.00`;
+
+      // 2. 更新容仙物價局 (假設一張專輯 $150)
+      const indexText = document.getElementById('report-index-text');
+      if (wasteBalance >= 0) {
+        const albums = (wasteBalance / 150).toFixed(1);
+        indexText.innerHTML = `大發！今個月【娛樂與購物】慳落嘅錢，足足夠買 <strong class="text-lg underline decoration-2">${albums} 張實體專輯</strong> 呀！🎉`;
+      } else {
+        const albumsLost = (Math.abs(wasteBalance) / 150).toFixed(1);
+        indexText.innerHTML = `警告！今個月娛樂超支，相等於你親手撕碎咗 <strong class="text-lg underline decoration-2">${albumsLost} 張容仙專輯</strong>... 💔`;
+      }
+
+      // 3. 更新專屬結語
+      const quoteEl = document.getElementById('report-quote');
+      if (pct >= 100) {
+        quoteEl.innerHTML = `「大發！本月超額儲蓄，追星基金拉滿，離第一排又近咗啦！🎉✨」<br><span class="text-xs text-memo-muted block mt-2">— 滿意點頭的金容仙</span>`;
+      } else if (pct >= 80) {
+        quoteEl.innerHTML = `「穩定發揮！今個月有好好守住防線，荷包非常健康！💪」<br><span class="text-xs text-memo-muted block mt-2">— 俾個讚你的金容仙</span>`;
+      } else {
+        quoteEl.innerHTML = `「警報！儲蓄進度落後，下個月罰你聽《BLUES》冷靜一下！🚨」<br><span class="text-xs text-memo-muted block mt-2">— 皺緊眉頭的金容仙</span>`;
+      }
+
+      // 顯示彈窗並重新載入 Icons
+      document.getElementById('report-modal').classList.remove('hidden');
+      lucide.createIcons();
     }
   </script>
 </body>
