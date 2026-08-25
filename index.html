@@ -287,11 +287,6 @@
               </div>
             </div>
 
-            <div id="fixed-expense-container" class="flex items-center space-x-2 bg-slate-100 p-3 border-[2px] border-memo-border shadow-[2px_2px_0_0_#475569]">
-              <input type="checkbox" id="tx-is-fixed" class="w-4 h-4 border-2 border-memo-border cursor-pointer">
-              <label for="tx-is-fixed" class="text-sm font-black cursor-pointer select-none text-memo-text">每月固定支出 (如房租/Fromm訂閱)</label>
-            </div>
-
             <div class="grid grid-cols-2 gap-5">
               <div>
                 <label class="block text-sm font-black mb-2 uppercase text-memo-text">分類</label>
@@ -767,8 +762,6 @@
 
       document.getElementById('tx-amount').value = '';
       document.getElementById('tx-note').value = '';
-      const fixCb = document.getElementById('tx-is-fixed');
-      if(fixCb) fixCb.checked = false;
       document.getElementById('conversion-preview').classList.add('hidden');
 
       if (apiUrl) {
