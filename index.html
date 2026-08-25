@@ -782,7 +782,12 @@
       if (apiUrl) {
         updateSyncStatus(null, '傳輸中...');
         try {
-          await fetch(apiUrl, { method: 'POST', body: JSON.stringify({ action: 'add', data: newTx }) });
+        await fetch(apiUrl, {
+  method: 'POST',
+  mode: 'no-cors',
+  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+  body: JSON.stringify({ action: 'add', data: newTx })
+});
           updateSyncStatus(true, '同步成功');
         } catch (err) {
           updateSyncStatus(false, '傳送失敗 (留存本地)');
@@ -802,7 +807,12 @@
       if (apiUrl) {
         updateSyncStatus(null, '傳輸中...');
         try {
-          await fetch(apiUrl, { method: 'POST', body: JSON.stringify({ action: 'delete', id: id }) });
+        await fetch(apiUrl, {
+  method: 'POST',
+  mode: 'no-cors',
+  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+  body: JSON.stringify({ action: 'delete', id: id })
+});
           updateSyncStatus(true, '同步成功');
         } catch (err) {
           updateSyncStatus(false, '刪除失敗');
@@ -843,7 +853,12 @@
         renderDashboard();
 
         if (apiUrl) {
-          fetch(apiUrl, { method: 'POST', body: JSON.stringify({ action: 'add', data: newTx }) });
+          fetch(apiUrl, {
+  method: 'POST',
+  mode: 'no-cors',
+  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+  body: JSON.stringify({ action: 'add', data: newTx })
+});
         }
       }
     }
