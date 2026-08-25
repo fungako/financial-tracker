@@ -291,20 +291,21 @@
             </div>
 
             <div class="grid grid-cols-2 gap-5">
-          <!-- 改用 flex 排版，縮減日期的寬度 -->
-            <div class="flex gap-4">
-              <div class="flex-1">
+         <!-- 1. 分類與日期區塊 (使用 Flex 完美適應手機) -->
+            <div class="flex gap-3">
+              <div class="flex-1 min-w-0">
                 <label class="block text-sm font-black mb-2 uppercase text-memo-text">分類</label>
                 <select id="tx-category" class="w-full bg-white border-[3px] border-memo-border px-3 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#475569] cursor-pointer text-memo-text">
                 </select>
               </div>
-              <div class="w-[145px] sm:w-[160px] shrink-0">
+              <div class="w-[140px] shrink-0">
                 <label class="block text-sm font-black mb-2 uppercase text-memo-text">日期</label>
                 <input type="date" id="tx-date" required class="w-full bg-white border-[3px] border-memo-border px-2 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#475569] text-memo-text">
               </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-5">
+            <!-- 2. 支付方式與備註區塊 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label class="block text-sm font-black mb-2 uppercase text-memo-text">支付方式</label>
                 <select id="tx-account" class="w-full bg-white border-[3px] border-memo-border px-3 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#475569] cursor-pointer text-memo-text">
