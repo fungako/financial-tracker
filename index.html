@@ -530,6 +530,8 @@
       if (!apiUrl) {
         updateSyncStatus(false, '尚未連線');
         document.getElementById('settings-modal').classList.remove('hidden');
+        initMonthSelector();
+        filterDataByMonth();
         renderDashboard();
         return;
       }
@@ -539,36 +541,37 @@
       if (spinIcon) spinIcon.classList.add('animate-spin');
 
       try {
-        const res = await fetch(apiUrl);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒逾時防卡死
+
+        const res = await fetch(apiUrl, {
+          method: 'GET',
+          mode: 'cors',
+          redirect: 'follow',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
         if (res.ok) {
-          const text = await res.text();
-          let data;
-          try {
-            data = JSON.parse(text);
-          } catch(e) {
-            throw new Error('Google 回傳了非 JSON 格式（通常是權限或錯誤頁面）');
-          }
-          
+          const data = await res.json();
           if (Array.isArray(data)) {
             allTransactions = data;
             localStorage.setItem('smartspend_records', JSON.stringify(allTransactions));
             updateSyncStatus(true, '同步成功');
-          } else if (data && data.error) {
-            throw new Error(data.error);
           } else {
-            throw new Error('資料格式不正確');
+            throw new Error('回傳格式錯誤');
           }
         } else {
-          throw new Error('連線失敗 (' + res.status + ')');
+          throw new Error('連線回應異常: ' + res.status);
         }
       } catch (err) {
-        console.error('Sync failed:', err);
+        console.warn('雲端同步失敗，切換為本機紀錄:', err);
         updateSyncStatus(false, '同步失敗');
       } finally {
         if (spinIcon) spinIcon.classList.remove('animate-spin');
         initMonthSelector();
         filterDataByMonth();
-        renderDashboard();
+        renderDashboard(); // 強制解除載入動畫並繪製介面
       }
     }
 
@@ -967,9 +970,11 @@
       renderList();
     }
 
-    function renderList() {
+  function renderList() {
       const container = document.getElementById('tx-list');
-      if(!container) return;
+      if (!container) return;
+
+      container.innerHTML = ''; // 確保先清空旋轉載入動畫
 
       const filtered = transactions.filter(t => currentFilter === 'all' || t.type === currentFilter);
 
@@ -983,6 +988,8 @@
         lucide.createIcons();
         return;
       }
+      
+      // ... 後面保留原本的 forEach 渲染邏輯
 
       let html = '';
       filtered.forEach(item => {
