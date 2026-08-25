@@ -529,8 +529,6 @@
       if (!apiUrl) {
         updateSyncStatus(false, '尚未連線');
         document.getElementById('settings-modal').classList.remove('hidden');
-        initMonthSelector();
-        filterDataByMonth();
         renderDashboard();
         return;
       }
@@ -539,31 +537,42 @@
       const spinIcon = document.getElementById('sync-spin-icon');
       if (spinIcon) spinIcon.classList.add('animate-spin');
 
-     try {
-        // 💡 加上隨機時間戳與 no-store，強迫瀏覽器每次都抓最新資料，不准用快取！
-        const fetchUrl = apiUrl + (apiUrl.includes('?') ? '&' : '?') + 'nocache=' + new Date().getTime();
-        const res = await fetch(fetchUrl, { cache: 'no-store' });
+      try {
+        // 1. 加上隨機時間戳，強迫瀏覽器抓取最新資料，防止快取作怪
+        const fetchUrl = apiUrl + (apiUrl.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+        const res = await fetch(fetchUrl);
         
         if (res.ok) {
-          const data = await res.json();
+          const text = await res.text();
+          let data = JSON.parse(text);
+          
           if (Array.isArray(data)) {
-            allTransactions = data;
+            // 2. 💡 關鍵修復：強制把 Google 搞亂的日期格式洗回 YYYY-MM-DD
+            allTransactions = data.map(t => {
+              if (t && t.date) {
+                const d = new Date(t.date);
+                if (!isNaN(d.getTime())) {
+                  const y = d.getFullYear();
+                  const m = String(d.getMonth() + 1).padStart(2, '0');
+                  const day = String(d.getDate()).padStart(2, '0');
+                  t.date = `${y}-${m}-${day}`;
+                }
+              }
+              return t;
+            });
+            
             localStorage.setItem('smartspend_records', JSON.stringify(allTransactions));
             updateSyncStatus(true, '同步成功');
-          } else {
-            throw new Error('回傳格式錯誤');
           }
-        } else {
-          throw new Error('連線回應異常: ' + res.status);
         }
       } catch (err) {
-        console.warn('雲端同步失敗，切換為本機紀錄:', err);
+        console.warn('Sync failed:', err);
         updateSyncStatus(false, '同步失敗');
       } finally {
         if (spinIcon) spinIcon.classList.remove('animate-spin');
         initMonthSelector();
         filterDataByMonth();
-        renderDashboard(); // 強制解除載入動畫並繪製介面
+        renderDashboard();
       }
     }
 
