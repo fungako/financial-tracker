@@ -851,7 +851,7 @@
     function renderDashboard() {
       let currExpense = 0, currIncome = 0, currSaving = 0;
       let currBasicSpent = 0, currWasteSpent = 0;
-      let lastExpense = 0, lastSaving = 0;
+      let lastExpense = 0, lastSaving = 0, lastWasteSpent = 0;
 
       const lastMonthTargetStr = getLastMonthString(selectedMonthStr);
 
@@ -866,10 +866,14 @@
         if (t.type === 'saving') currSaving += t.amountHKD;
       });
 
-  // 計算比較的上個月
+// 計算比較的上個月
       allTransactions.forEach(t => {
-        if(t && typeof t.date === 'string' && t.date.startsWith(lastMonthTargetStr)) {
-          if(t.type === 'expense') lastExpense += t.amountHKD;
+        if(t && t.date && t.date.startsWith(lastMonthTargetStr)) {
+          if(t.type === 'expense') {
+            lastExpense += t.amountHKD;
+            // 補上這行：計算上個月小廢物花了多少
+            if(wasteCats.includes(t.category)) lastWasteSpent += t.amountHKD;
+          }
           if(t.type === 'saving') lastSaving += t.amountHKD;
         }
       });
