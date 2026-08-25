@@ -165,7 +165,7 @@
           </div>
           <div>
             <h3 class="text-lg font-black uppercase tracking-wide text-memo-text">📝 忍手成功嘅獎勵！</h3>
-            <p class="text-sm font-bold mt-1 text-memo-muted">上個月【娛樂與購物】竟然慳返 <strong id="rollover-amount" class="text-memo-text text-lg border-b-2 border-memo-border">HK$ 0.00</strong>！</p>
+            <p class="text-sm font-bold mt-1 text-memo-muted">上個月【快樂小廢物】竟然慳返 <strong id="rollover-amount" class="text-memo-text text-lg border-b-2 border-memo-border">HK$ 0.00</strong>！</p>
           </div>
         </div>
         <div class="flex space-x-3">
@@ -173,7 +173,7 @@
             👉 及時行樂 (加到本月)！
           </button>
           <button id="btn-claim-base" class="memo-btn px-4 py-2.5 text-xs bg-memo-border text-white hover:bg-white hover:text-memo-text">
-            👉 直接入落追星基金！
+            👉 直接入落面聖基金！
           </button>
         </div>
       </div>
@@ -211,10 +211,10 @@
           <div class="text-right text-xs font-black text-memo-text" id="basic-ratio">0 / 7,200 HKD</div>
         </div>
 
-        <!-- 娛樂與購物 -->
+        <!-- 快樂小廢物 -->
         <div>
           <div class="flex justify-between items-end mb-2">
-            <span class="text-sm font-black uppercase text-memo-text">✨ 娛樂與購物 (25%)</span>
+            <span class="text-sm font-black uppercase text-memo-text">✨ 快樂小廢物 (25%)</span>
             <span id="gacha-status-text" class="text-xs font-bold text-memo-muted">載入中...</span>
           </div>
           <div class="memo-bar-bg mb-2">
@@ -296,10 +296,10 @@
                   <option value="JPY">JPY</option>
                   <option value="USD">USD</option>
                 </select>
-                <input type="number" step="any" id="tx-amount" placeholder="0.00" required class="flex-1 bg-transparent px-4 py-3 text-lg font-black outline-none placeholder:text-gray-400">
+                <input type="number" step="any" id="tx-amount" placeholder="0.00" required class="flex-1 bg-transparent px-4 py-3 text-lg font-black outline-none placeholder:text-gray-400 text-memo-text">
               </div>
 
-              <div id="conversion-preview" class="hidden mt-3 px-4 py-3 bg-gray-100 border-[2px] border-memo-border shadow-[2px_2px_0_0_#475569] text-xs flex items-center justify-between font-black uppercase">
+              <div id="conversion-preview" class="hidden mt-3 px-4 py-3 bg-gray-100 border-[2px] border-memo-border shadow-[2px_2px_0_0_#475569] text-xs flex items-center justify-between font-black uppercase text-memo-text">
                 <div class="flex items-center space-x-2">
                   <i data-lucide="arrow-right-left" class="w-4 h-4 text-memo-muted"></i>
                   <span>折合港幣：</span>
@@ -330,8 +330,8 @@
               <div>
                 <label class="block text-sm font-black mb-2 uppercase text-memo-text">支付方式</label>
                 <select id="tx-account" class="w-full bg-white border-[3px] border-memo-border px-3 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#475569] cursor-pointer text-memo-text">
-                  <option value="信用卡">信用卡</option>
-                  <option value="現金">現金</option>
+                  <option value="信用卡">信用卡刷下去</option>
+                  <option value="現金">現金鈔票</option>
                   <option value="銀行轉帳">銀行轉帳/FPS</option>
                   <option value="八達通/電子錢包">八達通/PayMe</option>
                 </select>
@@ -433,13 +433,13 @@
     // MooMoo 本命預算設定 (月薪 18,000 HKD)
     const BUDGET = {
       BASIC: 7200,   // 40% (基本與固定開支)
-      WASTE: 4500    // 25% (娛樂與購物)
+      WASTE: 4500    // 25% (快樂小廢物)
     };
 
     const categories = {
       expense: [
         '餐飲', '交通', '房租', 'Fromm訂閱', '固定支出 (房租/Fromm訂閱)', // 基本開支
-        '周邊', '衣服', '保養護膚' // 娛樂與購物
+        '周邊', '衣服', '保養護膚' // 快樂小廢物
       ],
       income: ['打工/薪水', '股息回報', '其他收入'],
       saving: [
@@ -474,10 +474,16 @@
     // 時間工具
     const today = new Date();
     const currentMonthStr = today.toISOString().slice(0, 7);
-    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-    const lastMonthStr = lastMonthDate.toISOString().slice(0, 7);
 
-    let allTransactions = JSON.parse(localStorage.getItem('smartspend_records')) || [];
+    // ⚠️ 安全解析 LocalStorage，避免 JSON 損壞導致死機
+    let allTransactions = [];
+    try {
+      allTransactions = JSON.parse(localStorage.getItem('smartspend_records')) || [];
+    } catch (e) {
+      allTransactions = [];
+      console.warn("Local storage parse error, reset to empty array.");
+    }
+
     let currentFilter = 'all';
     let apiUrl = localStorage.getItem('smartspend_api_url') || '';
     let selectedMonthStr = currentMonthStr; // YYYY-MM
@@ -531,7 +537,8 @@
 
     function randomizeQuote() {
       const idx = Math.floor(Math.random() * solarQuotes.length);
-      document.getElementById('solar-quote').textContent = solarQuotes[idx];
+      const quoteEl = document.getElementById('solar-quote');
+      if(quoteEl) quoteEl.textContent = solarQuotes[idx];
     }
 
     async function fetchLiveRates() {
@@ -587,6 +594,7 @@
     function updateSyncStatus(isSuccess, text) {
       const dot = document.getElementById('sync-indicator');
       const label = document.getElementById('sync-status');
+      if(!dot || !label) return;
       label.textContent = text;
       if (isSuccess === true) {
         dot.className = 'w-2.5 h-2.5 bg-memo-border border-2 border-memo-border inline-block';
@@ -668,7 +676,8 @@
           } else {
             fixedContainer.classList.add('hidden');
             fixedContainer.classList.remove('flex');
-            document.getElementById('tx-is-fixed').checked = false;
+            const fixCb = document.getElementById('tx-is-fixed');
+            if(fixCb) fixCb.checked = false;
           }
 
           renderCategoryOptions(type);
@@ -676,19 +685,30 @@
         });
       });
 
-      document.getElementById('tx-amount').addEventListener('input', updatePreview);
-      document.getElementById('tx-currency').addEventListener('change', updatePreview);
-      document.getElementById('tx-form').addEventListener('submit', handleAddTransaction);
+      const txAmountEl = document.getElementById('tx-amount');
+      if(txAmountEl) txAmountEl.addEventListener('input', updatePreview);
+      
+      const txCurrEl = document.getElementById('tx-currency');
+      if(txCurrEl) txCurrEl.addEventListener('change', updatePreview);
+      
+      const txForm = document.getElementById('tx-form');
+      if(txForm) txForm.addEventListener('submit', handleAddTransaction);
 
       // Rollover Buttons
-      document.getElementById('btn-claim-gacha').addEventListener('click', () => handleRollover('gacha'));
-      document.getElementById('btn-claim-base').addEventListener('click', () => handleRollover('base'));
+      const btnGacha = document.getElementById('btn-claim-gacha');
+      if(btnGacha) btnGacha.addEventListener('click', () => handleRollover('gacha'));
+      
+      const btnBase = document.getElementById('btn-claim-base');
+      if(btnBase) btnBase.addEventListener('click', () => handleRollover('base'));
 
-      document.getElementById('btn-manual-sync').addEventListener('click', () => {
+      const btnSync = document.getElementById('btn-manual-sync');
+      if(btnSync) btnSync.addEventListener('click', () => {
         randomizeQuote();
         syncFromCloud();
       });
-      document.getElementById('btn-export-csv').addEventListener('click', exportToCSV);
+      
+      const btnExport = document.getElementById('btn-export-csv');
+      if(btnExport) btnExport.addEventListener('click', exportToCSV);
 
       // Filter Buttons
       document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -708,7 +728,7 @@
       if(!select) return;
       select.innerHTML = '';
       
-      let opts = categories[type];
+      let opts = categories[type] || [];
       opts.forEach(cat => {
         const opt = document.createElement('option');
         opt.value = cat;
@@ -750,7 +770,7 @@
       const amountHKD = +(originalAmount * rate).toFixed(2);
       
       let category = document.getElementById('tx-category').value;
-      const isFixed = document.getElementById('tx-is-fixed').checked;
+      const isFixed = document.getElementById('tx-is-fixed') && document.getElementById('tx-is-fixed').checked;
       if (type === 'expense' && isFixed) {
         category = '固定支出 (房租/Fromm訂閱)';
       }
@@ -779,7 +799,7 @@
 
       document.getElementById('tx-amount').value = '';
       document.getElementById('tx-note').value = '';
-      document.getElementById('tx-is-fixed').checked = false;
+      if(document.getElementById('tx-is-fixed')) document.getElementById('tx-is-fixed').checked = false;
       document.getElementById('conversion-preview').classList.add('hidden');
 
       if (apiUrl) {
@@ -813,15 +833,29 @@
       }
     };
 
+    // 計算安全月份 (防範跨時區 Bug)
+    function getLastMonthString(currentStr) {
+      if (!currentStr || !currentStr.includes('-')) return '';
+      const parts = currentStr.split('-');
+      let y = parseInt(parts[0]);
+      let m = parseInt(parts[1]) - 1;
+      if (m === 0) {
+        m = 12;
+        y -= 1;
+      }
+      return `${y}-${String(m).padStart(2, '0')}`;
+    }
+
     async function handleRollover(actionType) {
+      const lastMonthTargetStr = getLastMonthString(selectedMonthStr);
       const remainingGacha = window.lastMonthGachaRemaining || 0;
       if(remainingGacha <= 0) return;
 
-      localStorage.setItem(`rollover_claimed_${lastMonthStr}`, 'true');
+      localStorage.setItem(`rollover_claimed_${lastMonthTargetStr}`, 'true');
       
       if(actionType === 'gacha') {
-        let existingBonus = parseFloat(localStorage.getItem(`gacha_bonus_${currentMonthStr}`)) || 0;
-        localStorage.setItem(`gacha_bonus_${currentMonthStr}`, existingBonus + remainingGacha);
+        let existingBonus = parseFloat(localStorage.getItem(`gacha_bonus_${selectedMonthStr}`)) || 0;
+        localStorage.setItem(`gacha_bonus_${selectedMonthStr}`, existingBonus + remainingGacha);
         document.getElementById('rollover-alert').classList.add('hidden');
         renderDashboard();
       } else if (actionType === 'base') {
@@ -854,11 +888,8 @@
       let currExpense = 0, currIncome = 0, currSaving = 0;
       let currBasicSpent = 0, currWasteSpent = 0;
 
-      // 取得上個月的字串，用於 MoM 比較
-      const [year, month] = selectedMonthStr.split('-');
-      const currDateObj = new Date(year, month - 1, 1);
-      currDateObj.setMonth(currDateObj.getMonth() - 1);
-      const lastMonthTargetStr = currDateObj.toISOString().slice(0, 7);
+      // 安全取得上個月的字串
+      const lastMonthTargetStr = getLastMonthString(selectedMonthStr);
 
       let lastExpense = 0, lastSaving = 0;
 
@@ -884,32 +915,41 @@
       const netBalance = currIncome - currExpense - currSaving;
       const fmt = (num) => 'HK$ ' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-      document.getElementById('stat-expense').textContent = fmt(currExpense);
-      document.getElementById('stat-saving').textContent = fmt(currSaving);
-      document.getElementById('stat-balance').textContent = fmt(netBalance);
-      document.getElementById('stat-income').textContent = fmt(currIncome);
+      const statExpense = document.getElementById('stat-expense');
+      const statSaving = document.getElementById('stat-saving');
+      const statBalance = document.getElementById('stat-balance');
+      const statIncome = document.getElementById('stat-income');
+      
+      if(statExpense) statExpense.textContent = fmt(currExpense);
+      if(statSaving) statSaving.textContent = fmt(currSaving);
+      if(statBalance) statBalance.textContent = fmt(netBalance);
+      if(statIncome) statIncome.textContent = fmt(currIncome);
 
       // --- 追星戰報分析 (MoM) ---
       const expenseDiff = currExpense - lastExpense;
       const momExpEl = document.getElementById('mom-expense-text');
-      if (lastExpense === 0) {
-         momExpEl.innerHTML = `<span class="text-slate-500">上個月無資料比較</span>`;
-      } else if (expenseDiff > 0) {
-        momExpEl.innerHTML = `呀！今個月洗多咗 ${fmt(Math.abs(expenseDiff))}，離容仙又遠咗一步ㅠㅠ`;
-      } else if (expenseDiff < 0) {
-        momExpEl.innerHTML = `大發！今個月比上個月慳咗 ${fmt(Math.abs(expenseDiff))}，又可以抽多兩張專！🎉`;
-      } else {
-        momExpEl.innerHTML = `同上個月一樣咁生性，繼續保持住！✨`;
+      if (momExpEl) {
+        if (lastExpense === 0) {
+           momExpEl.innerHTML = `<span class="text-slate-500">上個月無資料比較</span>`;
+        } else if (expenseDiff > 0) {
+          momExpEl.innerHTML = `呀！今個月洗多咗 ${fmt(Math.abs(expenseDiff))}，離容仙又遠咗一步ㅠㅠ`;
+        } else if (expenseDiff < 0) {
+          momExpEl.innerHTML = `大發！今個月比上個月慳咗 ${fmt(Math.abs(expenseDiff))}，又可以抽多兩張專！🎉`;
+        } else {
+          momExpEl.innerHTML = `同上個月一樣咁生性，繼續保持住！✨`;
+        }
       }
 
       const savingDiff = currSaving - lastSaving;
       const momSavEl = document.getElementById('mom-saving-text');
-      if (lastSaving === 0) {
-         momSavEl.innerHTML = `<span class="text-slate-500">上月無紀錄</span>`;
-      } else if (savingDiff >= 0) {
-        momSavEl.innerHTML = `儲錢達標 (+${fmt(savingDiff)})，機票基金越來越穩陣！`;
-      } else {
-        momSavEl.innerHTML = `儲得慢咗 (-${fmt(Math.abs(savingDiff))})，下個月要加把勁慳錢！`;
+      if (momSavEl) {
+        if (lastSaving === 0) {
+           momSavEl.innerHTML = `<span class="text-slate-500">上月無紀錄</span>`;
+        } else if (savingDiff >= 0) {
+          momSavEl.innerHTML = `儲錢達標 (+${fmt(savingDiff)})，機票基金越來越穩陣！`;
+        } else {
+          momSavEl.innerHTML = `儲得慢咗 (-${fmt(Math.abs(savingDiff))})，下個月要加把勁慳錢！`;
+        }
       }
 
       // --- 預算紙條更新 ---
@@ -917,51 +957,62 @@
       const basicPct = Math.min(100, (currBasicSpent / BUDGET.BASIC) * 100);
       const basicBar = document.getElementById('basic-bar');
       const basicText = document.getElementById('basic-status-text');
-      document.getElementById('basic-ratio').textContent = `${currBasicSpent.toLocaleString()} / ${BUDGET.BASIC.toLocaleString()} HKD`;
-      basicBar.style.width = `${basicPct}%`;
+      const basicRatio = document.getElementById('basic-ratio');
+      if(basicRatio) basicRatio.textContent = `${currBasicSpent.toLocaleString()} / ${BUDGET.BASIC.toLocaleString()} HKD`;
+      if(basicBar) basicBar.style.width = `${basicPct}%`;
       
-      if(basicPct < 60) {
-        basicBar.className = "memo-bar-fill"; // Solid
-        basicText.innerHTML = '日常食飽飽，先有力見金容仙跑！';
-      } else if (basicPct < 85) {
-        basicBar.className = "memo-bar-fill bar-warning"; // Striped
-        basicText.innerHTML = '飯錢超標警告！食樹皮嘅日子近了...🚨';
-      } else {
-        basicBar.className = "memo-bar-fill"; // Solid
-        basicText.innerHTML = '<span class="font-black line-through decoration-2">準備去食樹皮！</span>';
+      if(basicText && basicBar) {
+        if(basicPct < 60) {
+          basicBar.className = "memo-bar-fill"; // Solid
+          basicText.innerHTML = '日常食飽飽，先有力見金容仙跑！';
+        } else if (basicPct < 85) {
+          basicBar.className = "memo-bar-fill bar-warning"; // Striped
+          basicText.innerHTML = '飯錢超標警告！食樹皮嘅日子近了...🚨';
+        } else {
+          basicBar.className = "memo-bar-fill"; // Solid
+          basicText.innerHTML = '<span class="font-black line-through decoration-2">準備去食樹皮！</span>';
+        }
       }
 
       // Waste Bar
       let currentWasteBudget = BUDGET.WASTE;
-      let gachaBonus = parseFloat(localStorage.getItem(`gacha_bonus_${currentMonthStr}`)) || 0;
+      let gachaBonus = parseFloat(localStorage.getItem(`gacha_bonus_${selectedMonthStr}`)) || 0;
       currentWasteBudget += gachaBonus;
 
       const wastePct = Math.min(100, (currWasteSpent / currentWasteBudget) * 100);
       const gachaBar = document.getElementById('gacha-bar');
       const gachaText = document.getElementById('gacha-status-text');
-      document.getElementById('gacha-ratio').textContent = `${currWasteSpent.toLocaleString()} / ${currentWasteBudget.toLocaleString()} HKD`;
-      gachaBar.style.width = `${wastePct}%`;
+      const gachaRatio = document.getElementById('gacha-ratio');
+      if(gachaRatio) gachaRatio.textContent = `${currWasteSpent.toLocaleString()} / ${currentWasteBudget.toLocaleString()} HKD`;
+      if(gachaBar) gachaBar.style.width = `${wastePct}%`;
 
-      if(wastePct < 60) {
-        gachaBar.className = "memo-bar-fill";
-        gachaText.innerHTML = '荷包好聽話，距離簽售又行前咗一大步！';
-      } else if (wastePct < 85) {
-        gachaBar.className = "memo-bar-fill bar-warning"; // Striped
-        gachaText.innerHTML = '金容仙警告你：收手啦！再買落去首爾簽售就冇你份㗎喇！🙅‍♀️🐰';
-      } else {
-        gachaBar.className = "memo-bar-fill";
-        gachaText.innerHTML = '<span class="font-black line-through decoration-2">預算見底！準備食樹皮！</span>';
+      if(gachaText && gachaBar) {
+        if(wastePct < 60) {
+          gachaBar.className = "memo-bar-fill";
+          gachaText.innerHTML = '荷包好聽話，距離簽售又行前咗一大步！';
+        } else if (wastePct < 85) {
+          gachaBar.className = "memo-bar-fill bar-warning"; // Striped
+          gachaText.innerHTML = '金容仙警告你：收手啦！再買落去首爾簽售就冇你份㗎喇！🙅‍♀️🐰';
+        } else {
+          gachaBar.className = "memo-bar-fill";
+          gachaText.innerHTML = '<span class="font-black line-through decoration-2">預算見底！準備食樹皮！</span>';
+        }
       }
 
       // --- Rollover 系統檢測 ---
-      const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthStr}`);
+      const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthTargetStr}`);
       const lastMonthRemaining = BUDGET.WASTE - lastWasteSpent;
-      if (!hasClaimed && lastMonthRemaining > 0 && allTransactions.some(t => t.date && t.date.startsWith(lastMonthStr))) {
-        window.lastMonthGachaRemaining = lastMonthRemaining;
-        document.getElementById('rollover-amount').textContent = `HK$ ${lastMonthRemaining.toLocaleString()}`;
-        document.getElementById('rollover-alert').classList.remove('hidden');
-      } else {
-        document.getElementById('rollover-alert').classList.add('hidden');
+      const rollOverAlert = document.getElementById('rollover-alert');
+      
+      if (rollOverAlert) {
+        if (!hasClaimed && lastMonthRemaining > 0 && allTransactions.some(t => t.date && t.date.startsWith(lastMonthTargetStr))) {
+          window.lastMonthGachaRemaining = lastMonthRemaining;
+          const rollAmt = document.getElementById('rollover-amount');
+          if(rollAmt) rollAmt.textContent = `HK$ ${lastMonthRemaining.toLocaleString()}`;
+          rollOverAlert.classList.remove('hidden');
+        } else {
+          rollOverAlert.classList.add('hidden');
+        }
       }
 
       renderList();
@@ -969,6 +1020,8 @@
 
     function renderList() {
       const container = document.getElementById('tx-list');
+      if(!container) return;
+      
       const filtered = transactions.filter(t => currentFilter === 'all' || t.type === currentFilter);
 
       if (filtered.length === 0) {
@@ -985,7 +1038,7 @@
       let html = '';
       filtered.forEach(item => {
         let sign = '-';
-        let iconName = 'shopping-cart';
+        let iconName = 'shopping-bag';
         let borderStyle = 'border-2 border-gray-300';
         let iconBg = 'bg-white text-black';
 
@@ -1052,7 +1105,7 @@
     function exportToCSV() {
       if (allTransactions.length === 0) return alert('目前沒有紀錄可以匯出！');
       
-      // 修復：將 \n 放在字串的尾端，且保證在同一行
+      // 💡 嚴格確保字串在單行內，使用 \n 做換行
       let csv = '\uFEFF日期,類型,類別,原始金額,幣別,參考匯率,折算港幣(HKD),帳戶,備註\n';
       allTransactions.forEach(t => {
         csv += `"${t.date}","${t.type}","${t.category}","${t.originalAmount}","${t.currency}","${t.rate}","${t.amountHKD}","${t.account}","${(t.note || '').replace(/"/g, '""')}"\n`;
