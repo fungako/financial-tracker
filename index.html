@@ -605,7 +605,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      // **重要修復：優先綁定 API 儲存按鈕，防止被任何後續錯誤中斷**
+   // --- 💡 將這三段按鈕邏輯移到最上方優先執行 ---
       const btnSaveApi = document.getElementById('btn-save-api');
       if (btnSaveApi) {
         btnSaveApi.addEventListener('click', () => {
