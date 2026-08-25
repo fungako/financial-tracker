@@ -230,7 +230,7 @@
       <!-- 總花費 -->
       <div class="memo-card p-5">
         <div class="flex items-center justify-between mb-4">
-          <span class="text-sm font-black uppercase text-memo-text">本月支出</span>
+          <span class="text-sm font-black uppercase text-memo-text">💸 本月支出</span>
           <i data-lucide="receipt" class="w-5 h-5 text-memo-muted"></i>
         </div>
         <div class="text-3xl font-black mb-4 tracking-tighter text-memo-text" id="stat-expense">HK$ 0.00</div>
@@ -250,7 +250,7 @@
       <!-- 淨結餘 -->
       <div class="memo-card p-5">
         <div class="flex items-center justify-between mb-4">
-          <span class="text-sm font-black uppercase text-memo-text">本月可用餘額</span>
+          <span class="text-sm font-black uppercase text-memo-text">🥪 本月可用餘額</span>
           <i data-lucide="piggy-bank" class="w-5 h-5 text-memo-muted"></i>
         </div>
         <div class="text-3xl font-black mb-4 tracking-tighter text-memo-text" id="stat-balance">HK$ 0.00</div>
@@ -330,8 +330,8 @@
               <div>
                 <label class="block text-sm font-black mb-2 uppercase text-memo-text">支付方式</label>
                 <select id="tx-account" class="w-full bg-white border-[3px] border-memo-border px-3 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#475569] cursor-pointer text-memo-text">
-                  <option value="信用卡">信用卡刷下去</option>
-                  <option value="現金">現金鈔票</option>
+                  <option value="信用卡">信用卡</option>
+                  <option value="現金">現金</option>
                   <option value="銀行轉帳">銀行轉帳/FPS</option>
                   <option value="八達通/電子錢包">八達通/PayMe</option>
                 </select>
@@ -471,39 +471,30 @@
       "「這筆錢存下來，我們簽售會上就能多聊兩句了呢！🗣️💕」"
     ];
 
-    // 時間工具
+    // 時間工具 (定義在最頂部)
     const today = new Date();
     const currentMonthStr = today.toISOString().slice(0, 7);
+    const lastMonthDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lastMonthStr = lastMonthDate.toISOString().slice(0, 7);
 
-    // 💡 防呆：保護 LocalStorage 免受壞資料當機
+    // 確保 localStorage 不會因為異常的資料格式崩潰
     let allTransactions = [];
     try {
       allTransactions = JSON.parse(localStorage.getItem('smartspend_records')) || [];
-    } catch (e) {
-      console.warn('LocalStorage error fixed.');
+    } catch(e) {
+      console.warn("Storage parsed failed, reset.");
       allTransactions = [];
     }
 
     let currentFilter = 'all';
     let apiUrl = localStorage.getItem('smartspend_api_url') || '';
-    let selectedMonthStr = currentMonthStr; 
+    let selectedMonthStr = currentMonthStr; // YYYY-MM
     let transactions = []; 
 
-    // 計算安全月份 (防範跨時區 Bug)
-    function getLastMonthString(currentStr) {
-      if (!currentStr || !currentStr.includes('-')) return '';
-      const parts = currentStr.split('-');
-      let y = parseInt(parts[0], 10);
-      let m = parseInt(parts[1], 10) - 1;
-      if (m === 0) {
-        m = 12;
-        y -= 1;
-      }
-      return `${y}-${String(m).padStart(2, '0')}`;
-    }
-
+    // 初始化月份下拉選單
     function initMonthSelector() {
       const selectors = ['month-selector', 'month-selector-mobile'];
+      
       const monthSet = new Set();
       monthSet.add(currentMonthStr);
       allTransactions.forEach(t => {
@@ -516,6 +507,7 @@
         const selector = document.getElementById(selId);
         if(!selector) return;
         
+        // 替換節點以清除舊的事件監聽器，防止重複綁定
         const newSelector = selector.cloneNode(true);
         selector.parentNode.replaceChild(newSelector, selector);
         
@@ -616,8 +608,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      
-      // 💡 確保連線按鈕能第一時間執行，不被卡住
+      // **重要修復：優先綁定 API 儲存按鈕，完全避開後方任何報錯阻擋**
       const btnSaveApi = document.getElementById('btn-save-api');
       if (btnSaveApi) {
         btnSaveApi.addEventListener('click', () => {
@@ -648,6 +639,7 @@
         });
       }
 
+      // 初始化表單
       const dateInput = document.getElementById('tx-date');
       if(dateInput) dateInput.value = new Date().toISOString().split('T')[0];
 
@@ -658,6 +650,7 @@
       initMonthSelector();
       filterDataByMonth();
 
+      // 檢查是否已設定 API
       if (apiUrl) {
         document.getElementById('api-url-input').value = apiUrl;
         syncFromCloud();
@@ -666,6 +659,7 @@
         renderDashboard();
       }
 
+      // 類型與固定支出 Checkbox 連動
       document.querySelectorAll('.type-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const type = e.currentTarget.dataset.type;
@@ -676,6 +670,7 @@
           });
           e.currentTarget.className = `type-btn active memo-btn py-3 text-sm`;
           
+          // 只有 Expense 顯示固定支出 checkbox
           const fixedContainer = document.getElementById('fixed-expense-container');
           if(type === 'expense') {
             fixedContainer.classList.remove('hidden');
@@ -683,8 +678,8 @@
           } else {
             fixedContainer.classList.add('hidden');
             fixedContainer.classList.remove('flex');
-            const fixCb = document.getElementById('tx-is-fixed');
-            if(fixCb) fixCb.checked = false;
+            const cb = document.getElementById('tx-is-fixed');
+            if(cb) cb.checked = false;
           }
 
           renderCategoryOptions(type);
@@ -692,26 +687,30 @@
         });
       });
 
-      const txAmountEl = document.getElementById('tx-amount');
-      if(txAmountEl) txAmountEl.addEventListener('input', updatePreview);
-      const txCurrEl = document.getElementById('tx-currency');
-      if(txCurrEl) txCurrEl.addEventListener('change', updatePreview);
+      const txAmt = document.getElementById('tx-amount');
+      if(txAmt) txAmt.addEventListener('input', updatePreview);
+      const txCur = document.getElementById('tx-currency');
+      if(txCur) txCur.addEventListener('change', updatePreview);
       const txForm = document.getElementById('tx-form');
       if(txForm) txForm.addEventListener('submit', handleAddTransaction);
 
+      // Rollover Buttons
       const btnGacha = document.getElementById('btn-claim-gacha');
       if(btnGacha) btnGacha.addEventListener('click', () => handleRollover('gacha'));
       const btnBase = document.getElementById('btn-claim-base');
       if(btnBase) btnBase.addEventListener('click', () => handleRollover('base'));
 
       const btnSync = document.getElementById('btn-manual-sync');
-      if(btnSync) btnSync.addEventListener('click', () => {
-        randomizeQuote();
-        syncFromCloud();
-      });
-      const btnExport = document.getElementById('btn-export-csv');
-      if(btnExport) btnExport.addEventListener('click', exportToCSV);
+      if(btnSync) {
+        btnSync.addEventListener('click', () => {
+          randomizeQuote();
+          syncFromCloud();
+        });
+      }
+      const btnExp = document.getElementById('btn-export-csv');
+      if(btnExp) btnExp.addEventListener('click', exportToCSV);
 
+      // Filter Buttons
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           document.querySelectorAll('.filter-btn').forEach(b => {
@@ -728,6 +727,7 @@
       const select = document.getElementById('tx-category');
       if(!select) return;
       select.innerHTML = '';
+      
       let opts = categories[type] || [];
       opts.forEach(cat => {
         const opt = document.createElement('option');
@@ -742,6 +742,7 @@
       const currencyEl = document.getElementById('tx-currency');
       const previewBox = document.getElementById('conversion-preview');
       const previewVal = document.getElementById('preview-hkd-val');
+      
       if(!amountEl || !currencyEl || !previewBox || !previewVal) return;
 
       const amount = parseFloat(amountEl.value);
@@ -787,10 +788,12 @@
       allTransactions.unshift(newTx);
       localStorage.setItem('smartspend_records', JSON.stringify(allTransactions));
       
+      // 若新增的是目前查看的月份，重新篩選
       if(date.startsWith(selectedMonthStr)) {
         filterDataByMonth();
       }
       
+      // 更新下拉選單看有沒有產生新月份
       initMonthSelector();
       renderDashboard();
 
@@ -832,15 +835,14 @@
     };
 
     async function handleRollover(actionType) {
-      const lastMonthTargetStr = getLastMonthString(selectedMonthStr);
       const remainingGacha = window.lastMonthGachaRemaining || 0;
       if(remainingGacha <= 0) return;
 
-      localStorage.setItem(`rollover_claimed_${lastMonthTargetStr}`, 'true');
+      localStorage.setItem(`rollover_claimed_${lastMonthStr}`, 'true');
       
       if(actionType === 'gacha') {
-        let existingBonus = parseFloat(localStorage.getItem(`gacha_bonus_${selectedMonthStr}`)) || 0;
-        localStorage.setItem(`gacha_bonus_${selectedMonthStr}`, existingBonus + remainingGacha);
+        let existingBonus = parseFloat(localStorage.getItem(`gacha_bonus_${currentMonthStr}`)) || 0;
+        localStorage.setItem(`gacha_bonus_${currentMonthStr}`, existingBonus + remainingGacha);
         document.getElementById('rollover-alert').classList.add('hidden');
         renderDashboard();
       } else if (actionType === 'base') {
@@ -872,10 +874,16 @@
     function renderDashboard() {
       let currExpense = 0, currIncome = 0, currSaving = 0;
       let currBasicSpent = 0, currWasteSpent = 0;
+
+      // 取得上個月的字串，用於 MoM 比較
+      const [year, month] = selectedMonthStr.split('-');
+      const currDateObj = new Date(year, month - 1, 1);
+      currDateObj.setMonth(currDateObj.getMonth() - 1);
+      const lastMonthTargetStr = currDateObj.toISOString().slice(0, 7);
+
       let lastExpense = 0, lastSaving = 0;
 
-      const lastMonthTargetStr = getLastMonthString(selectedMonthStr);
-
+      // 計算當前選擇月份
       transactions.forEach(t => {
         if (t.type === 'expense') {
           currExpense += t.amountHKD;
@@ -886,6 +894,7 @@
         if (t.type === 'saving') currSaving += t.amountHKD;
       });
 
+      // 計算比較的上個月
       allTransactions.forEach(t => {
         if(t.date && t.date.startsWith(lastMonthTargetStr)) {
           if(t.type === 'expense') lastExpense += t.amountHKD;
@@ -896,19 +905,20 @@
       const netBalance = currIncome - currExpense - currSaving;
       const fmt = (num) => 'HK$ ' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-      const statExpense = document.getElementById('stat-expense');
-      const statSaving = document.getElementById('stat-saving');
-      const statBalance = document.getElementById('stat-balance');
-      const statIncome = document.getElementById('stat-income');
+      const statExp = document.getElementById('stat-expense');
+      const statSav = document.getElementById('stat-saving');
+      const statBal = document.getElementById('stat-balance');
+      const statInc = document.getElementById('stat-income');
       
-      if(statExpense) statExpense.textContent = fmt(currExpense);
-      if(statSaving) statSaving.textContent = fmt(currSaving);
-      if(statBalance) statBalance.textContent = fmt(netBalance);
-      if(statIncome) statIncome.textContent = fmt(currIncome);
+      if(statExp) statExp.textContent = fmt(currExpense);
+      if(statSav) statSav.textContent = fmt(currSaving);
+      if(statBal) statBal.textContent = fmt(netBalance);
+      if(statInc) statInc.textContent = fmt(currIncome);
 
+      // --- 追星戰報分析 (MoM) ---
       const expenseDiff = currExpense - lastExpense;
       const momExpEl = document.getElementById('mom-expense-text');
-      if (momExpEl) {
+      if(momExpEl) {
         if (lastExpense === 0) {
            momExpEl.innerHTML = `<span class="text-slate-500">上個月無資料比較</span>`;
         } else if (expenseDiff > 0) {
@@ -922,7 +932,7 @@
 
       const savingDiff = currSaving - lastSaving;
       const momSavEl = document.getElementById('mom-saving-text');
-      if (momSavEl) {
+      if(momSavEl) {
         if (lastSaving === 0) {
            momSavEl.innerHTML = `<span class="text-slate-500">上月無紀錄</span>`;
         } else if (savingDiff >= 0) {
@@ -932,6 +942,8 @@
         }
       }
 
+      // --- 預算紙條更新 ---
+      // Basic Bar
       const basicPct = Math.min(100, (currBasicSpent / BUDGET.BASIC) * 100);
       const basicBar = document.getElementById('basic-bar');
       const basicText = document.getElementById('basic-status-text');
@@ -939,21 +951,22 @@
       if(basicRatio) basicRatio.textContent = `${currBasicSpent.toLocaleString()} / ${BUDGET.BASIC.toLocaleString()} HKD`;
       if(basicBar) basicBar.style.width = `${basicPct}%`;
       
-      if(basicText && basicBar) {
+      if(basicBar && basicText) {
         if(basicPct < 60) {
-          basicBar.className = "memo-bar-fill";
+          basicBar.className = "memo-bar-fill"; // Solid
           basicText.innerHTML = '日常食飽飽，先有力見金容仙跑！';
         } else if (basicPct < 85) {
-          basicBar.className = "memo-bar-fill bar-warning"; 
+          basicBar.className = "memo-bar-fill bar-warning"; // Striped
           basicText.innerHTML = '飯錢超標警告！食樹皮嘅日子近了...🚨';
         } else {
-          basicBar.className = "memo-bar-fill"; 
+          basicBar.className = "memo-bar-fill"; // Solid
           basicText.innerHTML = '<span class="font-black line-through decoration-2">準備去食樹皮！</span>';
         }
       }
 
+      // Waste Bar
       let currentWasteBudget = BUDGET.WASTE;
-      let gachaBonus = parseFloat(localStorage.getItem(`gacha_bonus_${selectedMonthStr}`)) || 0;
+      let gachaBonus = parseFloat(localStorage.getItem(`gacha_bonus_${currentMonthStr}`)) || 0;
       currentWasteBudget += gachaBonus;
 
       const wastePct = Math.min(100, (currWasteSpent / currentWasteBudget) * 100);
@@ -963,12 +976,12 @@
       if(gachaRatio) gachaRatio.textContent = `${currWasteSpent.toLocaleString()} / ${currentWasteBudget.toLocaleString()} HKD`;
       if(gachaBar) gachaBar.style.width = `${wastePct}%`;
 
-      if(gachaText && gachaBar) {
+      if(gachaBar && gachaText) {
         if(wastePct < 60) {
           gachaBar.className = "memo-bar-fill";
           gachaText.innerHTML = '荷包好聽話，距離簽售又行前咗一大步！';
         } else if (wastePct < 85) {
-          gachaBar.className = "memo-bar-fill bar-warning";
+          gachaBar.className = "memo-bar-fill bar-warning"; // Striped
           gachaText.innerHTML = '金容仙警告你：收手啦！再買落去首爾簽售就冇你份㗎喇！🙅‍♀️🐰';
         } else {
           gachaBar.className = "memo-bar-fill";
@@ -976,18 +989,18 @@
         }
       }
 
-      const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthTargetStr}`);
+      // --- Rollover 系統檢測 ---
+      const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthStr}`);
       const lastMonthRemaining = BUDGET.WASTE - lastWasteSpent;
-      const rollOverAlert = document.getElementById('rollover-alert');
-      
-      if (rollOverAlert) {
-        if (!hasClaimed && lastMonthRemaining > 0 && allTransactions.some(t => t.date && t.date.startsWith(lastMonthTargetStr))) {
+      const roAlert = document.getElementById('rollover-alert');
+      if (roAlert) {
+        if (!hasClaimed && lastMonthRemaining > 0 && allTransactions.some(t => t.date && t.date.startsWith(lastMonthStr))) {
           window.lastMonthGachaRemaining = lastMonthRemaining;
-          const rollAmt = document.getElementById('rollover-amount');
-          if(rollAmt) rollAmt.textContent = `HK$ ${lastMonthRemaining.toLocaleString()}`;
-          rollOverAlert.classList.remove('hidden');
+          const roAmt = document.getElementById('rollover-amount');
+          if(roAmt) roAmt.textContent = `HK$ ${lastMonthRemaining.toLocaleString()}`;
+          roAlert.classList.remove('hidden');
         } else {
-          rollOverAlert.classList.add('hidden');
+          roAlert.classList.add('hidden');
         }
       }
 
@@ -997,7 +1010,7 @@
     function renderList() {
       const container = document.getElementById('tx-list');
       if(!container) return;
-      
+
       const filtered = transactions.filter(t => currentFilter === 'all' || t.type === currentFilter);
 
       if (filtered.length === 0) {
@@ -1035,6 +1048,7 @@
           ? `<span class="text-[10px] font-black ml-2 underline decoration-2 text-slate-500">(${item.originalAmount.toLocaleString()} ${item.currency})</span>` 
           : '';
 
+        // 💔 容仙物價超痛擊換算器 (Albums = 150)
         let painText = '';
         if (item.type === 'expense' && wasteCats.includes(item.category)) {
           const albumsLost = (item.amountHKD / 150).toFixed(1);
