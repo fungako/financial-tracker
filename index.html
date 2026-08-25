@@ -245,9 +245,13 @@
           <form id="tx-form" class="space-y-5">
             <div>
               <label class="block text-sm font-black mb-2 uppercase text-memo-text">類型</label>
-              <div class="grid grid-cols-3 gap-3">
+              <!-- 變成 2x2 網格，獨立出固定支出 -->
+              <div class="grid grid-cols-2 gap-3">
                 <button type="button" data-type="expense" class="type-btn active memo-btn py-3 text-sm">
-                  💸 支出
+                  💸 日常支出
+                </button>
+                <button type="button" data-type="fixed" class="type-btn memo-btn py-3 text-sm bg-slate-100 text-slate-400 border-slate-300 shadow-none hover:bg-slate-200 hover:text-black">
+                  📌 固定支出
                 </button>
                 <button type="button" data-type="income" class="type-btn memo-btn py-3 text-sm bg-slate-100 text-slate-400 border-slate-300 shadow-none hover:bg-slate-200 hover:text-black">
                   💰 入帳
@@ -258,6 +262,9 @@
               </div>
               <input type="hidden" id="tx-type" value="expense">
             </div>
+
+            <!-- (原本的 tx-currency 和 tx-amount 金額區塊保留不變...) -->
+            <!-- ⚠️ 注意：原本的 <div id="fixed-expense-container">...</div> 整個刪除！ -->
 
             <div>
               <label class="block text-sm font-black mb-2 uppercase text-memo-text">金額與幣別</label>
@@ -403,19 +410,13 @@
     };
 
     const categories = {
-      expense: [
-        '餐飲', '交通', '房租', 'Fromm訂閱', '固定支出 (房租/Fromm訂閱)',
-        '周邊', '衣服', '保養護膚'
-      ],
+      expense: ['餐飲', '交通', '周邊', '衣服', '保養護膚', '其他日常'], // 抽走房租和訂閱
+      fixed: ['房租', 'Fromm訂閱', '電話費/上網', '其他固定'], // 新增專屬固定分類
       income: ['打工/薪水', '股息回報', '其他收入'],
-      saving: [
-        '韓國機票', '演唱會門票', '買專抽簽售專用',
-        '定期定額 ETF 投資',
-        '緊急醫療備用'
-      ]
+      saving: ['韓國機票', '演唱會門票', '買專抽簽售專用', '定期定額 ETF 投資', '緊急醫療備用']
     };
 
-    const basicCats = [ '餐飲', '交通', '房租', 'Fromm訂閱', '固定支出 (房租/Fromm訂閱)'];
+    const basicCats = ['餐飲', '交通', '房租', 'Fromm訂閱', '電話費/上網', '其他固定', '其他日常'];
     const wasteCats = ['周邊', '衣服', '保養護膚'];
 
     const solarQuotes = [
@@ -641,7 +642,7 @@
         renderDashboard();
       }
 
-      document.querySelectorAll('.type-btn').forEach(btn => {
+     document.querySelectorAll('.type-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           const type = e.currentTarget.dataset.type;
           document.getElementById('tx-type').value = type;
@@ -651,17 +652,7 @@
           });
           e.currentTarget.className = `type-btn active memo-btn py-3 text-sm`;
           
-          const fixedContainer = document.getElementById('fixed-expense-container');
-          if(type === 'expense') {
-            fixedContainer.classList.remove('hidden');
-            fixedContainer.classList.add('flex');
-          } else {
-            fixedContainer.classList.add('hidden');
-            fixedContainer.classList.remove('flex');
-            const cb = document.getElementById('tx-is-fixed');
-            if(cb) cb.checked = false;
-          }
-
+          // 直接根據按鈕切換分類，不用再管 checkbox
           renderCategoryOptions(type);
           updatePreview();
         });
@@ -741,23 +732,24 @@
 
     async function handleAddTransaction(e) {
       e.preventDefault();
-      const type = document.getElementById('tx-type').value;
+      
+      const rawType = document.getElementById('tx-type').value;
+      // 💡 關鍵：如果 UI 點選了「固定支出」，資料庫一樣當作「支出 (expense)」儲存
+      const type = (rawType === 'fixed') ? 'expense' : rawType;
+      
       const currency = document.getElementById('tx-currency').value;
       const originalAmount = parseFloat(document.getElementById('tx-amount').value);
       const rate = exchangeRates[currency] || 1.0;
       const amountHKD = +(originalAmount * rate).toFixed(2);
       
       let category = document.getElementById('tx-category').value;
-      const isFixed = document.getElementById('tx-is-fixed') && document.getElementById('tx-is-fixed').checked;
-      if (type === 'expense' && isFixed) {
-        category = '固定支出 (房租/Fromm訂閱)';
-      }
-
       const date = document.getElementById('tx-date').value;
       const account = document.getElementById('tx-account').value;
       const note = document.getElementById('tx-note').value.trim();
 
       if (!originalAmount || originalAmount <= 0) return;
+      
+      // ... 後面的 const newTx = { ... } 保留不變
 
       const newTx = {
         id: Date.now().toString(), type, category, originalAmount, currency, rate, amountHKD, date, account, note
