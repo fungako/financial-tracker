@@ -539,18 +539,11 @@
       const spinIcon = document.getElementById('sync-spin-icon');
       if (spinIcon) spinIcon.classList.add('animate-spin');
 
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒逾時防卡死
-
-        const res = await fetch(apiUrl, {
-          method: 'GET',
-          mode: 'cors',
-          redirect: 'follow',
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-
+     try {
+        // 💡 加上隨機時間戳與 no-store，強迫瀏覽器每次都抓最新資料，不准用快取！
+        const fetchUrl = apiUrl + (apiUrl.includes('?') ? '&' : '?') + 'nocache=' + new Date().getTime();
+        const res = await fetch(fetchUrl, { cache: 'no-store' });
+        
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data)) {
