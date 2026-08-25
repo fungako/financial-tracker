@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Monthly Memo</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐰</text></svg>">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1182,6 +1184,16 @@
       // 顯示彈窗並重新載入 Icons
       document.getElementById('report-modal').classList.remove('hidden');
       lucide.createIcons();
+    }
+  </script>
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker Registered!', reg))
+          .catch(err => console.error('Service Worker Failed!', err));
+      });
     }
   </script>
 </body>
