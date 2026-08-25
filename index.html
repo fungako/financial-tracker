@@ -202,6 +202,31 @@
           </div>
           <div class="text-right text-xs font-black text-memo-text" id="gacha-ratio">0 / 4,500 HKD</div>
         </div>
+
+        <!-- 3. 彈性儲蓄 (20%) -->
+        <div>
+          <div class="flex justify-between items-end mb-2">
+            <span class="text-sm font-black uppercase text-memo-text">✈️ 彈性儲蓄 (20%)</span>
+            <span id="flex-status-text" class="text-xs font-bold text-memo-muted">載入中...</span>
+          </div>
+          <div class="memo-bar-bg mb-2">
+            <div id="flex-bar" class="memo-bar-fill w-0 bg-slate-400"></div>
+          </div>
+          <div class="text-right text-xs font-black text-memo-text" id="flex-ratio">0 / 3,600 HKD</div>
+        </div>
+
+        <!-- 4. 緊急備用金 (15%) -->
+        <div>
+          <div class="flex justify-between items-end mb-2">
+            <span class="text-sm font-black uppercase text-memo-text">🚑 緊急備用金 (15%)</span>
+            <span id="urgent-status-text" class="text-xs font-bold text-memo-muted">載入中...</span>
+          </div>
+          <div class="memo-bar-bg mb-2">
+            <div id="urgent-bar" class="memo-bar-fill w-0 bg-slate-700"></div>
+          </div>
+          <div class="text-right text-xs font-black text-memo-text" id="urgent-ratio">0 / 2,700 HKD</div>
+        </div>
+        
       </div>
     </div>
 
@@ -923,24 +948,38 @@
       }
     }
 
-    function renderDashboard() {
+   function renderDashboard() {
       let currExpense = 0, currIncome = 0, currSaving = 0;
       let currBasicSpent = 0, currWasteSpent = 0;
+      let currFlexSaving = 0, currUrgentSaving = 0; // 👈 新增：用來分開計算兩種儲蓄
       let lastExpense = 0, lastSaving = 0, lastWasteSpent = 0;
 
       const lastMonthTargetStr = getLastMonthString(selectedMonthStr);
 
       transactions.forEach(t => {
         if (!t) return;
+        
         if (t.type === 'expense') {
           currExpense += t.amountHKD;
           if(basicCats.includes(t.category)) currBasicSpent += t.amountHKD;
           if(wasteCats.includes(t.category)) currWasteSpent += t.amountHKD;
         }
-        if (t.type === 'income') currIncome += t.amountHKD;
-        if (t.type === 'saving') currSaving += t.amountHKD;
+        
+        if (t.type === 'income') {
+          currIncome += t.amountHKD;
+        }
+        
+        // 💡 關鍵修改：將儲蓄金額根據分類拆進兩個不同的進度條
+        if (t.type === 'saving') {
+          currSaving += t.amountHKD; // 保留原本的總儲蓄計算
+          
+          if (t.category === '緊急醫療備用') {
+            currUrgentSaving += t.amountHKD; // 入緊急備用金
+          } else {
+            currFlexSaving += t.amountHKD;   // 其他全部入彈性儲蓄 (追星基金)
+          }
+        }
       });
-
 // 計算比較的上個月
       allTransactions.forEach(t => {
         if(t && t.date && t.date.startsWith(lastMonthTargetStr)) {
@@ -1036,6 +1075,76 @@
         }
       }
 
+     // --- 彈性儲蓄進度條 (20% - 帶超支倒扣懲罰機制) ---
+      const localGachaBonus = parseFloat(localStorage.getItem(`gacha_bonus_${selectedMonthStr}`)) || 0;
+      const localWasteBudget = BUDGET.WASTE + localGachaBonus;
+
+      // 1. 計算兩大支出的超支金額
+      const basicOverspent = Math.max(0, currBasicSpent - BUDGET.BASIC);
+      const wasteOverspent = Math.max(0, currWasteSpent - localWasteBudget);
+      const totalOverspent = basicOverspent + wasteOverspent;
+
+      // 2. 扣除超支金額（若超支大於已儲存金額，會變成負數）
+      const netFlexSaving = currFlexSaving - totalOverspent;
+
+      const TARGET_FLEX = 3600;
+      const flexPct = (netFlexSaving / TARGET_FLEX) * 100;
+      const flexBar = document.getElementById('flex-bar');
+      const flexText = document.getElementById('flex-status-text');
+      const flexRatio = document.getElementById('flex-ratio');
+      
+      // 3. 數值顯示（若為負數以粗體與底線標示）
+      if(flexRatio) {
+        if (netFlexSaving < 0) {
+          flexRatio.innerHTML = `<span class="underline decoration-2 font-black text-red-500">${netFlexSaving.toLocaleString()}</span> / ${TARGET_FLEX.toLocaleString()} HKD`;
+        } else {
+          flexRatio.textContent = `${netFlexSaving.toLocaleString()} / ${TARGET_FLEX.toLocaleString()} HKD`;
+        }
+      }
+
+      // 4. 進度條與評語反饋
+      if(flexBar) {
+        if (netFlexSaving < 0) {
+          flexBar.style.width = '100%';
+          flexBar.className = 'memo-bar-fill bar-warning';
+        } else {
+          flexBar.style.width = `${Math.min(100, Math.max(0, flexPct))}%`;
+          flexBar.className = 'memo-bar-fill bg-slate-400';
+        }
+      }
+      
+      if(flexText) {
+        if (netFlexSaving < 0) {
+          flexText.innerHTML = `🚨 超支透支中！倒扣咗 HK$ ${Math.abs(netFlexSaving).toLocaleString()}！`;
+        } else if (flexPct >= 100) {
+          flexText.innerHTML = '彈性儲備達標！隨時可以買機票起飛！✈️';
+        } else if (flexPct >= 50) {
+          flexText.innerHTML = '進度過半！繼續保持！💪';
+        } else {
+          flexText.innerHTML = '距離去見金容仙仲有段距離呀！🐢';
+        }
+      }
+
+      // --- 緊急備用金進度條 (15% - 保持原本安全邏輯) ---
+      const TARGET_URGENT = 2700;
+      const urgentPct = Math.min(100, (currUrgentSaving / TARGET_URGENT) * 100);
+      const urgentBar = document.getElementById('urgent-bar');
+      const urgentText = document.getElementById('urgent-status-text');
+      const urgentRatio = document.getElementById('urgent-ratio');
+      
+      if(urgentRatio) urgentRatio.textContent = `${currUrgentSaving.toLocaleString()} / ${TARGET_URGENT.toLocaleString()} HKD`;
+      if(urgentBar) urgentBar.style.width = `${urgentPct}%`;
+      
+      if(urgentText) {
+        if(urgentPct >= 100) {
+          urgentText.innerHTML = '保命金達標！充滿安全感！🛡️';
+        } else if (urgentPct >= 50) {
+          urgentText.innerHTML = '保命金儲蓄中...好穩陣！🧱';
+        } else {
+          urgentText.innerHTML = '安全網未夠厚，小心啲呀！🚨';
+        }
+      }
+     
       const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthTargetStr}`);
       const lastMonthRemaining = BUDGET.WASTE - lastWasteSpent;
       const roAlert = document.getElementById('rollover-alert');
