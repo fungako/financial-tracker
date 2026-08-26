@@ -338,9 +338,9 @@
               </div>
             </div>
 
-            <!-- 2. 支付方式與備註區塊 -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
+           <!-- 2. 支付方式與備註區塊 (改成 Flex，支付較窄，備註拉長) -->
+            <div class="flex flex-col sm:flex-row gap-5">
+              <div class="sm:w-[150px] shrink-0">
                 <label class="block text-sm font-black mb-2 uppercase text-memo-text">支付方式</label>
                 <select id="tx-account" class="w-full bg-white border-[3px] border-memo-border px-3 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#475569] cursor-pointer text-memo-text">
                   <option value="信用卡">信用卡</option>
@@ -349,7 +349,7 @@
                   <option value="八達通/電子錢包">八達通/PayMe</option>
                 </select>
               </div>
-              <div>
+              <div class="flex-1 min-w-0">
                 <label class="block text-sm font-black mb-2 uppercase text-memo-text">備註說明</label>
                 <input type="text" id="tx-note" placeholder="例如：買了金容仙新專..." class="w-full bg-white border-[3px] border-memo-border px-4 py-3 text-sm font-bold outline-none shadow-[4px_4px_0_0_#475569] placeholder:text-slate-400 text-memo-text">
               </div>
@@ -663,7 +663,6 @@
       if (spinIcon) spinIcon.classList.add('animate-spin');
 
       try {
-        // 1. 加上隨機時間戳，強迫瀏覽器抓取最新資料，防止快取作怪
         const fetchUrl = apiUrl + (apiUrl.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
         const res = await fetch(fetchUrl);
         
@@ -691,7 +690,7 @@
             if (data.tobuy) {
               toBuyItems = data.tobuy;
               localStorage.setItem('memo_tobuy_items', JSON.stringify(toBuyItems));
-              renderToBuyList();
+              if (typeof renderToBuyList === 'function') renderToBuyList();
             }
             
             updateSyncStatus(true, '同步成功');
@@ -711,6 +710,8 @@
             });
             localStorage.setItem('smartspend_records', JSON.stringify(allTransactions));
             updateSyncStatus(true, '同步成功');
+          } else {
+             throw new Error("數據格式錯誤");
           }
         }
       } catch (err) {
