@@ -671,8 +671,32 @@
           const text = await res.text();
           let data = JSON.parse(text);
           
-          if (Array.isArray(data)) {
-            // 2. 💡 關鍵修復：強制把 Google 搞亂的日期格式洗回 YYYY-MM-DD
+          // 💡 新版格式 (包含 transactions 同 tobuy)
+          if (data && data.transactions) {
+            allTransactions = data.transactions.map(t => {
+              if (t && t.date) {
+                const d = new Date(t.date);
+                if (!isNaN(d.getTime())) {
+                  const y = d.getFullYear();
+                  const m = String(d.getMonth() + 1).padStart(2, '0');
+                  const day = String(d.getDate()).padStart(2, '0');
+                  t.date = `${y}-${m}-${day}`;
+                }
+              }
+              return t;
+            });
+            localStorage.setItem('smartspend_records', JSON.stringify(allTransactions));
+            
+            // 同步待買清單
+            if (data.tobuy) {
+              toBuyItems = data.tobuy;
+              localStorage.setItem('memo_tobuy_items', JSON.stringify(toBuyItems));
+              renderToBuyList();
+            }
+            
+            updateSyncStatus(true, '同步成功');
+          } else if (Array.isArray(data)) {
+            // 兼容舊版單一陣列格式
             allTransactions = data.map(t => {
               if (t && t.date) {
                 const d = new Date(t.date);
@@ -685,7 +709,6 @@
               }
               return t;
             });
-            
             localStorage.setItem('smartspend_records', JSON.stringify(allTransactions));
             updateSyncStatus(true, '同步成功');
           }
@@ -716,6 +739,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      const tobuyForm = document.getElementById('tobuy-form');
+      if (tobuyForm) tobuyForm.addEventListener('submit', addToBuyItem);
+      renderToBuyList();
       const btnSaveApi = document.getElementById('btn-save-api');
       if (btnSaveApi) {
         btnSaveApi.addEventListener('click', () => {
@@ -1356,6 +1382,104 @@
           .catch(err => console.error('Service Worker Failed!', err));
       });
     }
+
+    // ==========================================
+    // 🛍️ 待買清單 (To-Buy List) 專屬 JavaScript
+    // ==========================================
+    let toBuyItems = [];
+    try {
+      toBuyItems = JSON.parse(localStorage.getItem('memo_tobuy_items')) || [];
+    } catch(e) {
+      toBuyItems = [];
+    }
+
+    function renderToBuyList() {
+      const container = document.getElementById('tobuy-list-container');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      if (toBuyItems.length === 0) {
+        container.innerHTML = '<p class="text-xs font-bold text-memo-muted py-2 text-center">清單空空如也，荷包好安全！🧘‍♀️</p>';
+        return;
+      }
+
+      toBuyItems.forEach((item) => {
+        const div = document.createElement('div');
+        div.className = `flex items-center justify-between p-3 border-2 transition-all ${item.done ? 'bg-slate-50 border-slate-300 opacity-60' : 'bg-white border-memo-border shadow-[2px_2px_0_0_#475569]'}`;
+        div.innerHTML = `
+          <div class="flex items-center space-x-3 flex-1 min-w-0">
+            <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleToBuy('${item.id}')" class="w-4 h-4 cursor-pointer shrink-0 accent-slate-700">
+            <span class="text-sm font-bold truncate ${item.done ? 'line-through text-slate-500' : 'text-memo-text'}">${item.text}</span>
+          </div>
+          <button onclick="deleteToBuy('${item.id}')" class="text-slate-400 hover:text-red-500 transition-colors p-1 ml-2">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        `;
+        container.appendChild(div);
+      });
+      lucide.createIcons();
+    }
+
+    async function addToBuyItem(e) {
+      e.preventDefault();
+      const input = document.getElementById('tobuy-input');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      const newItem = { id: Date.now().toString(), text, done: false };
+      toBuyItems.unshift(newItem);
+      localStorage.setItem('memo_tobuy_items', JSON.stringify(toBuyItems));
+      input.value = '';
+      renderToBuyList();
+
+      if (apiUrl) {
+        try {
+          await fetch(apiUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ target: 'tobuy', action: 'add', data: newItem })
+          });
+        } catch(err) { console.warn('ToBuy Sync Failed', err); }
+      }
+    }
+
+    window.toggleToBuy = async function(id) {
+      const item = toBuyItems.find(t => t.id === id);
+      if (!item) return;
+      item.done = !item.done;
+      localStorage.setItem('memo_tobuy_items', JSON.stringify(toBuyItems));
+      renderToBuyList();
+
+      if (apiUrl) {
+        try {
+          await fetch(apiUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ target: 'tobuy', action: 'toggle', id, done: item.done })
+          });
+        } catch(err) { console.warn('ToBuy Toggle Failed', err); }
+      }
+    };
+
+    window.deleteToBuy = async function(id) {
+      toBuyItems = toBuyItems.filter(t => t.id !== id);
+      localStorage.setItem('memo_tobuy_items', JSON.stringify(toBuyItems));
+      renderToBuyList();
+
+      if (apiUrl) {
+        try {
+          await fetch(apiUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ target: 'tobuy', action: 'delete', id })
+          });
+        } catch(err) { console.warn('ToBuy Delete Failed', err); }
+      }
+    };
+    
   </script>
 </body>
 </html>
