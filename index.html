@@ -396,17 +396,44 @@
             <button data-filter="saving" class="filter-btn memo-btn bg-white text-memo-text px-4 py-2 shadow-[2px_2px_0_0_#475569] hover:bg-memo-border hover:text-white">儲蓄</button>
           </div>
 
-          <div id="tx-list" class="space-y-4 overflow-y-auto max-h-[440px] pr-3 custom-scrollbar flex-1 pb-4">
+        <div id="tx-list" class="space-y-4 overflow-y-auto max-h-[440px] pr-3 custom-scrollbar flex-1 pb-4">
             <div class="text-center py-16 space-y-4 text-memo-muted">
               <i data-lucide="loader" class="w-10 h-10 mx-auto animate-spin"></i>
               <p class="text-sm font-black uppercase">努力載入雲端紀錄中...</p>
             </div>
           </div>
+        </div> <!-- 👈 認住呢個歷史紀錄卡片嘅收尾括號 -->
+
+        <!-- 👇👇👇 請將待買清單貼喺呢度！ 👇👇👇 -->
+        <div class="memo-card p-6 space-y-4">
+          <div class="flex items-center justify-between border-b-[3px] border-memo-border pb-3">
+            <h2 class="text-xl font-black uppercase tracking-tight flex items-center space-x-2 text-memo-text">
+              <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+              <span>🛍️ 待買清單</span>
+            </h2>
+            <span class="text-xs font-black bg-slate-100 px-2.5 py-1 border-2 border-memo-border shadow-[2px_2px_0_0_#475569] text-memo-text">
+              冷靜期審核中
+            </span>
+          </div>
+
+          <form id="tobuy-form" class="flex gap-3">
+            <input type="text" id="tobuy-input" placeholder="輸入想買的物品 (例如: 容仙同款睡衣...)" required class="flex-1 bg-white border-[3px] border-memo-border px-4 py-2.5 text-sm font-bold outline-none shadow-[4px_4px_0_0_#475569] placeholder:text-slate-400 text-memo-text">
+            <button type="submit" class="memo-btn px-4 py-2.5 text-xs flex items-center gap-1.5 shrink-0 bg-memo-border text-white hover:bg-white hover:text-memo-text">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>加入</span>
+            </button>
+          </form>
+
+          <div id="tobuy-list-container" class="space-y-2.5 pt-2">
+            <!-- 呢度會用 JS 動態顯示清單 -->
+          </div>
         </div>
-      </div>
+        <!-- 👆👆👆 貼到呢度為止 👆👆👆 -->
+
+      </div> <!-- 👈 呢個係右邊成個大區塊 (lg:col-span-7) 嘅收尾括號 -->
     </div>
   </main>
-
+  
   <!-- 📊 追星戰報彈窗 -->
   <div id="report-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
     <div class="memo-card w-full max-w-md p-6 space-y-6 border-[3px] border-memo-border shadow-[8px_8px_0_0_#475569]">
