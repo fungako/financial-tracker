@@ -284,6 +284,7 @@
           打工血汗錢：<span id="stat-income" class="text-memo-text">HK$ 0.00</span>
         </div>
       </div>
+     </div>
 
     <!-- 3. 操作區塊 -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -1198,9 +1199,9 @@
       if(statExp) statExp.textContent = fmt(currExpense);
       if(statSav) statSav.textContent = fmt(currSaving);
       
-      // 💡 如果開咗隱私模式，就變成星號 *****
-      if(statBal) statBal.textContent = hideBalance ? '*****' : fmt(netBalance);
-      if(statInc) statInc.textContent = hideBalance ? '*****' : fmt(currIncome);
+     // 💡 如果開咗隱私模式，就變成星號 HK$ *****
+      if(statBal) statBal.textContent = hideBalance ? 'HK$ *****' : fmt(netBalance);
+      if(statInc) statInc.textContent = hideBalance ? 'HK$ *****' : fmt(currIncome);
 
       const expenseDiff = currExpense - lastExpense;
       const momExpEl = document.getElementById('mom-expense-text');
