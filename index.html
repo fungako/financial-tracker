@@ -1306,15 +1306,14 @@
         }
       }
       
+   // 💡 確保只有一組宣告
       const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthTargetStr}`);
       const lastMonthRemaining = BUDGET.WASTE - lastWasteSpent;
       const roAlert = document.getElementById('rollover-alert');
-      const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthTargetStr}`);
-      const lastMonthRemaining = BUDGET.WASTE - lastWasteSpent;
-      const roAlert = document.getElementById('rollover-alert');
+      
       if (roAlert) {
         if (!hasClaimed && lastMonthRemaining > 0 && allTransactions.some(t => t && t.date && t.date.startsWith(lastMonthTargetStr))) {
-          // 💡 關鍵修改：將結餘數字設定落輸入框畀你睇同改
+          // 將結餘數字設定落輸入框畀你睇同改
           const roInput = document.getElementById('rollover-amount-input');
           if (roInput) roInput.value = lastMonthRemaining;
           
