@@ -140,16 +140,28 @@
   <!-- 主內容容器 -->
   <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-8 space-y-8">
 
-    <!-- 跨月結餘掉落 -->
+   <!-- 跨月結餘掉落 -->
     <div id="rollover-alert" class="hidden memo-card p-6 bg-white relative overflow-hidden">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+      <!-- 🆕 新增：關閉按鈕 (X) -->
+      <button id="btn-close-rollover" class="absolute top-3 right-3 text-slate-400 hover:text-red-500 transition-colors p-1" title="略過獎勵">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5 pr-6">
         <div class="flex items-start space-x-4">
           <div class="w-12 h-12 bg-white text-memo-text border-[3px] border-memo-border flex items-center justify-center shrink-0 shadow-[2px_2px_0_0_#475569]">
             <i data-lucide="heart-handshake" class="w-6 h-6"></i>
           </div>
           <div>
             <h3 class="text-lg font-black uppercase tracking-wide text-memo-text">📝 忍手成功嘅獎勵！</h3>
-            <p class="text-sm font-bold mt-1 text-memo-muted">上個月【娛樂與購物】竟然慳返 <strong id="rollover-amount" class="text-memo-text text-lg border-b-2 border-memo-border">HK$ 0.00</strong>！</p>
+            <!-- 🆕 修改：變成可編輯的數字輸入框 -->
+            <div class="flex items-center space-x-2 mt-1">
+              <p class="text-sm font-bold text-memo-muted">上月【娛樂與購物】慳返</p>
+              <div class="flex items-center">
+                <span class="text-sm font-bold text-memo-text mr-1">HK$</span>
+                <input type="number" id="rollover-amount-input" class="w-24 bg-slate-50 border-b-2 border-memo-border px-1 py-0.5 text-lg font-black outline-none text-memo-text focus:bg-white transition-colors" value="0">
+              </div>
+            </div>
           </div>
         </div>
         <div class="flex space-x-3">
@@ -909,6 +921,15 @@
       const txForm = document.getElementById('tx-form');
       if(txForm) txForm.addEventListener('submit', handleAddTransaction);
 
+      const btnCloseRollover = document.getElementById('btn-close-rollover');
+      if (btnCloseRollover) {
+        btnCloseRollover.addEventListener('click', () => {
+          const lastMonthTargetStr = getLastMonthString(selectedMonthStr);
+          localStorage.setItem(`rollover_claimed_${lastMonthTargetStr}`, 'true'); // 標記為已處理
+          document.getElementById('rollover-alert').classList.add('hidden');
+        });
+      }
+      
       const btnGacha = document.getElementById('btn-claim-gacha');
       if(btnGacha) btnGacha.addEventListener('click', () => handleRollover('gacha'));
       const btnBase = document.getElementById('btn-claim-base');
@@ -1051,16 +1072,22 @@
       }
     };
 
-    async function handleRollover(actionType) {
+  async function handleRollover(actionType) {
       const lastMonthTargetStr = getLastMonthString(selectedMonthStr);
-      const remainingGacha = window.lastMonthGachaRemaining || 0;
-      if(remainingGacha <= 0) return;
+      // 💡 關鍵修改：從輸入框讀取你修改後嘅數值
+      const inputEl = document.getElementById('rollover-amount-input');
+      const finalAmount = parseFloat(inputEl.value) || 0;
+      
+      if(finalAmount <= 0) {
+        alert('請輸入大於 0 的金額！');
+        return;
+      }
 
       localStorage.setItem(`rollover_claimed_${lastMonthTargetStr}`, 'true');
       
       if(actionType === 'gacha') {
         let existingBonus = parseFloat(localStorage.getItem(`gacha_bonus_${selectedMonthStr}`)) || 0;
-        localStorage.setItem(`gacha_bonus_${selectedMonthStr}`, existingBonus + remainingGacha);
+        localStorage.setItem(`gacha_bonus_${selectedMonthStr}`, existingBonus + finalAmount);
         document.getElementById('rollover-alert').classList.add('hidden');
         renderDashboard();
       } else if (actionType === 'base') {
@@ -1068,13 +1095,13 @@
           id: Date.now().toString(),
           type: 'saving',
           category: '買專抽簽售專用',
-          originalAmount: remainingGacha,
+          originalAmount: finalAmount,
           currency: 'HKD',
           rate: 1.0,
-          amountHKD: remainingGacha,
+          amountHKD: finalAmount,
           date: new Date().toISOString().split('T')[0],
           account: '銀行轉帳',
-          note: `📝 忍手成功嘅獎勵！！(上月娛樂消費結餘)`
+          note: `📝 忍手成功嘅獎勵！！(結餘撥入)`
         };
         allTransactions.unshift(newTx);
         localStorage.setItem('smartspend_records', JSON.stringify(allTransactions));
@@ -1282,11 +1309,15 @@
       const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthTargetStr}`);
       const lastMonthRemaining = BUDGET.WASTE - lastWasteSpent;
       const roAlert = document.getElementById('rollover-alert');
+      const hasClaimed = localStorage.getItem(`rollover_claimed_${lastMonthTargetStr}`);
+      const lastMonthRemaining = BUDGET.WASTE - lastWasteSpent;
+      const roAlert = document.getElementById('rollover-alert');
       if (roAlert) {
         if (!hasClaimed && lastMonthRemaining > 0 && allTransactions.some(t => t && t.date && t.date.startsWith(lastMonthTargetStr))) {
-          window.lastMonthGachaRemaining = lastMonthRemaining;
-          const roAmt = document.getElementById('rollover-amount');
-          if(roAmt) roAmt.textContent = `HK$ ${lastMonthRemaining.toLocaleString()}`;
+          // 💡 關鍵修改：將結餘數字設定落輸入框畀你睇同改
+          const roInput = document.getElementById('rollover-amount-input');
+          if (roInput) roInput.value = lastMonthRemaining;
+          
           roAlert.classList.remove('hidden');
         } else {
           roAlert.classList.add('hidden');
