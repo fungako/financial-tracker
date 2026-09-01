@@ -270,17 +270,20 @@
         <div class="text-xs font-bold px-3 py-2 bg-white border-[2px] border-memo-border shadow-[2px_2px_0_0_#475569] inline-block text-memo-text" id="mom-saving-text">戰報分析中...</div>
       </div>
 
-      <div class="memo-card p-5">
+     <div class="memo-card p-5">
         <div class="flex items-center justify-between mb-4">
           <span class="text-sm font-black uppercase text-memo-text">🥪 本月可用餘額</span>
-          <i data-lucide="piggy-bank" class="w-5 h-5 text-memo-muted"></i>
+          <!-- 🆕 新增：隱藏/顯示 眼睛按鈕 (取代原本個豬仔錢箱) -->
+          <button id="btn-toggle-balance" class="text-memo-muted hover:text-memo-text transition-colors cursor-pointer p-1 rounded" title="顯示/隱藏金額">
+            <i data-lucide="eye" id="icon-eye" class="w-5 h-5"></i>
+            <i data-lucide="eye-off" id="icon-eye-off" class="w-5 h-5 hidden"></i>
+          </button>
         </div>
         <div class="text-3xl font-black mb-4 tracking-tighter text-memo-text" id="stat-balance">HK$ 0.00</div>
         <div class="text-xs font-bold text-memo-muted">
           打工血汗錢：<span id="stat-income" class="text-memo-text">HK$ 0.00</span>
         </div>
       </div>
-    </div>
 
     <!-- 3. 操作區塊 -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -846,6 +849,16 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      // 綁定「顯示/隱藏金額」按鈕
+      const btnToggleBalance = document.getElementById('btn-toggle-balance');
+      if (btnToggleBalance) {
+        btnToggleBalance.addEventListener('click', () => {
+          const isHidden = localStorage.getItem('hide_balance') === 'true';
+          localStorage.setItem('hide_balance', !isHidden); // 切換狀態
+          renderDashboard(); // 重新整理數字畫面
+        });
+      }
+      
       // 綁定待買清單事件
       const tobuyForm = document.getElementById('tobuy-form');
       if (tobuyForm) tobuyForm.addEventListener('submit', addToBuyItem);
@@ -1167,10 +1180,27 @@
       const statBal = document.getElementById('stat-balance');
       const statInc = document.getElementById('stat-income');
       
+     // 💡 讀取隱藏狀態
+      const hideBalance = localStorage.getItem('hide_balance') === 'true';
+      const iconEye = document.getElementById('icon-eye');
+      const iconEyeOff = document.getElementById('icon-eye-off');
+      
+      if (iconEye && iconEyeOff) {
+        if (hideBalance) {
+          iconEye.classList.add('hidden');
+          iconEyeOff.classList.remove('hidden');
+        } else {
+          iconEye.classList.remove('hidden');
+          iconEyeOff.classList.add('hidden');
+        }
+      }
+
       if(statExp) statExp.textContent = fmt(currExpense);
       if(statSav) statSav.textContent = fmt(currSaving);
-      if(statBal) statBal.textContent = fmt(netBalance);
-      if(statInc) statInc.textContent = fmt(currIncome);
+      
+      // 💡 如果開咗隱私模式，就變成星號 *****
+      if(statBal) statBal.textContent = hideBalance ? '*****' : fmt(netBalance);
+      if(statInc) statInc.textContent = hideBalance ? '*****' : fmt(currIncome);
 
       const expenseDiff = currExpense - lastExpense;
       const momExpEl = document.getElementById('mom-expense-text');
