@@ -1461,8 +1461,9 @@
     }
 
     function generateBattleReport() {
-      let currBasicSpent = 0, currWasteSpent = 0, currSaving = 0;
+      let currBasicSpent = 0, currWasteSpent = 0, currFlexSaving = 0;
       
+      // 1. 精準計算本月實際開支與彈性儲蓄
       transactions.forEach(t => {
         if (!t) return;
         const amt = Number(t.amountHKD) || 0;
@@ -1470,19 +1471,48 @@
           if (basicCats.includes(t.category)) currBasicSpent += amt;
           if (wasteCats.includes(t.category)) currWasteSpent += amt;
         }
-        if (t.type === 'saving') currSaving += amt;
+        if (t.type === 'saving') {
+          // 只計算追星基金與投資 (排除緊急備用金)
+          if (t.category !== '緊急醫療備用') {
+            currFlexSaving += amt;
+          }
+        }
       });
 
-      const basicBalance = BUDGET.BASIC - currBasicSpent;
-      const wasteBalance = BUDGET.WASTE - currWasteSpent;
-      const totalSaved = currSaving + basicBalance + wasteBalance;
-      const target = 3600;
-      const pct = (totalSaved / target) * 100;
+      // 2. 結合超支倒扣機制
+      const localGachaBonus = parseFloat(localStorage.getItem(`gacha_bonus_${selectedMonthStr}`)) || 0;
+      const localWasteBudget = BUDGET.WASTE + localGachaBonus;
       
+      const basicOverspent = Math.max(0, currBasicSpent - BUDGET.BASIC);
+      const wasteOverspent = Math.max(0, currWasteSpent - localWasteBudget);
+      
+      // 淨彈性儲蓄 = 真實主動存入 - 任何超支
+      const netFlexSaving = currFlexSaving - (basicOverspent + wasteOverspent);
+      const wasteBalance = localWasteBudget - currWasteSpent;
+      
+      const target = 3600;
+      const pct = (netFlexSaving / target) * 100;
+      
+      // 3. 更新彈窗進度條
       document.getElementById('report-pct-text').textContent = `${Math.max(0, pct).toFixed(1)}%`;
-      document.getElementById('report-bar').style.width = `${Math.min(100, Math.max(0, pct))}%`;
-      document.getElementById('report-fund-detail').textContent = `累積: HK$ ${totalSaved.toLocaleString('en-US', {minimumFractionDigits: 2})} / 目標: HK$ 3,600.00`;
+      
+      const reportBar = document.getElementById('report-bar');
+      if (netFlexSaving < 0) {
+        reportBar.style.width = '100%';
+        reportBar.className = 'memo-bar-fill bar-warning'; // 超支斑馬線
+      } else {
+        reportBar.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+        reportBar.className = 'memo-bar-fill bg-memo-border';
+      }
 
+      // 如果係負數透支，紅色粗體警告
+      const formattedSaving = netFlexSaving < 0 
+        ? `<span class="text-red-500 font-black">${netFlexSaving.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>`
+        : netFlexSaving.toLocaleString('en-US', {minimumFractionDigits: 2});
+        
+      document.getElementById('report-fund-detail').innerHTML = `累積: HK$ ${formattedSaving} / 目標: HK$ 3,600.00`;
+
+      // 4. 更新容仙物價局 (假設一張專輯 $150)
       const indexText = document.getElementById('report-index-text');
       if (wasteBalance >= 0) {
         const albums = (wasteBalance / 150).toFixed(1);
@@ -1492,13 +1522,16 @@
         indexText.innerHTML = `警告！今個月娛樂超支，相等於你親手撕碎咗 <strong class="text-lg underline decoration-2">${albumsLost} 張容仙專輯</strong>... 💔`;
       }
 
+      // 5. 更新專屬結語
       const quoteEl = document.getElementById('report-quote');
-      if (pct >= 100) {
+      if (netFlexSaving < 0) {
+        quoteEl.innerHTML = `「警報！儲蓄變負數透支緊，下個月罰你聽《BLUES》冷靜一下！🚨」<br><span class="text-xs text-memo-muted block mt-2">— 皺緊眉頭的金容仙</span>`;
+      } else if (pct >= 100) {
         quoteEl.innerHTML = `「大發！本月超額儲蓄，追星基金拉滿，離第一排又近咗啦！🎉✨」<br><span class="text-xs text-memo-muted block mt-2">— 滿意點頭的金容仙</span>`;
-      } else if (pct >= 80) {
+      } else if (pct >= 50) {
         quoteEl.innerHTML = `「穩定發揮！今個月有好好守住防線，荷包非常健康！💪」<br><span class="text-xs text-memo-muted block mt-2">— 俾個讚你的金容仙</span>`;
       } else {
-        quoteEl.innerHTML = `「警報！儲蓄進度落後，下個月罰你聽《BLUES》冷靜一下！🚨」<br><span class="text-xs text-memo-muted block mt-2">— 皺緊眉頭的金容仙</span>`;
+        quoteEl.innerHTML = `「距離目標仲差少少，今個月要忍手唔好亂買嘢啦！🐰」<br><span class="text-xs text-memo-muted block mt-2">— 望住你個購物車的金容仙</span>`;
       }
 
       document.getElementById('report-modal').classList.remove('hidden');
