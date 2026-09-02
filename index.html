@@ -526,7 +526,7 @@
       expense: ['餐飲', '交通', '周邊', '衣服', '保養護膚', '其他日常'],
       fixed: ['房租', 'Fromm訂閱', '電話費/上網', '其他固定'],
       income: ['打工/薪水', '股息回報', '其他收入'],
-      saving: ['韓國機票', '演唱會門票', '買專抽簽售專用', '定期定額 ETF 投資', '緊急醫療備用']
+      saving: ['追星基金', '投資', '緊急醫療備用'] // 👈 已經幫你精簡咗！
     };
     const basicCats = ['餐飲', '交通', '房租', 'Fromm訂閱', '電話費/上網', '其他固定', '其他日常'];
     const wasteCats = ['周邊', '衣服', '保養護膚'];
@@ -1104,11 +1104,11 @@
         localStorage.setItem(`gacha_bonus_${selectedMonthStr}`, existingBonus + finalAmount);
         document.getElementById('rollover-alert').classList.add('hidden');
         renderDashboard();
-      } else if (actionType === 'base') {
+     } else if (actionType === 'base') {
         const newTx = {
           id: Date.now().toString(),
           type: 'saving',
-          category: '買專抽簽售專用',
+          category: '追星基金', // 👈 呢度改做新名，等系統識得自動歸類
           originalAmount: finalAmount,
           currency: 'HKD',
           rate: 1.0,
